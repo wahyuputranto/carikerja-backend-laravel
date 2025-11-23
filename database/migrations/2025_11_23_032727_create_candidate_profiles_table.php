@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('candidate_profiles', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('candidate_id')->constrained('candidates')->onDelete('cascade');
+            $table->foreignUuid('candidate_id')->unique()->constrained('candidates')->onDelete('cascade');
             $table->string('nik')->unique()->nullable();
             $table->date('birth_date')->nullable();
             $table->string('birth_place')->nullable();
