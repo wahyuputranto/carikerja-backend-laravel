@@ -20,8 +20,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
 
-    // Master Data index page (Superadmin only)
-    Route::middleware('role:superadmin')->get('/master-data', fn () => Inertia::render('MasterData/Index'))->name('master-data.index');
+    // Master Data Routes (Superadmin only)
+    Route::middleware('role:superadmin')->prefix('master-data')->name('master-data.')->group(function () {
+        Route::get('/', fn () => Inertia::render('MasterData/Index'))->name('index');
+        
+        // Document Types
+        Route::resource('document-types', \App\Http\Controllers\DocumentTypeController::class)->except(['create', 'edit', 'show']);
+        
+        // Users
+        Route::resource('users', \App\Http\Controllers\UserController::class)->except(['create', 'edit', 'show']);
+    });
+
+    // Job Posting Routes
+    Route::resource('jobs', \App\Http\Controllers\JobController::class);
+
+    // Talent Pool Routes
+    Route::prefix('talent-pool')->name('talent-pool.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\TalentPoolController::class, 'index'])->name('index');
+        Route::get('/{candidate}', [\App\Http\Controllers\TalentPoolController::class, 'show'])->name('show');
+        Route::patch('/{candidate}/status', [\App\Http\Controllers\TalentPoolController::class, 'updateStatus'])->name('update-status');
+    });
 
     // Profile management
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

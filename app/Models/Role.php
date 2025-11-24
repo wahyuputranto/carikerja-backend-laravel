@@ -9,6 +9,8 @@ class Role extends Model
 {
     protected $table = 'roles';
     protected $guarded = [];
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     public function users(): HasMany
     {

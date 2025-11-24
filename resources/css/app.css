@@ -1,3 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    body {
+        @apply font-sans text-gray-800 antialiased;
+    }
+}
+
+@layer components {
+    /* Glassmorphism Utilities */
+    .glass {
+        @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-xl;
+    }
+    
+    .glass-dark {
+        @apply bg-gray-900/70 backdrop-blur-lg border border-gray-700/30 shadow-xl;
+    }
+
+    /* Premium Card */
+    .premium-card {
+        @apply glass dark:glass-dark rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1;
+    }
+
+    /* Gradient Text */
+    .text-gradient {
+        @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500;
+    }
+}
+
+/* Custom Animations */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+    opacity: 0;
+    transform: translateY(20px);
+}
