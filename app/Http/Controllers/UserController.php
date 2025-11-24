@@ -11,14 +11,28 @@ use Illuminate\Validation\Rules;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('role')->latest()->get();
+        $query = User::with('role');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'ilike', "%{$search}%")
+                  ->orWhere('email', 'ilike', "%{$search}%")
+                  ->orWhereHas('role', function ($q2) use ($search) {
+                      $q2->where('name', 'ilike', "%{$search}%");
+                  });
+            });
+        }
+
+        $users = $query->latest()->paginate(10)->withQueryString();
         $roles = Role::all();
         
         return Inertia::render('MasterData/Users/Index', [
             'users' => $users,
             'roles' => $roles,
+            'filters' => $request->only(['search']),
         ]);
     }
 

@@ -1,8 +1,9 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import PremiumButton from '@/Components/PremiumButton.vue';
+import { debounce } from 'lodash-es';
 
 defineOptions({
     layout: AppLayout,
@@ -10,7 +11,17 @@ defineOptions({
 
 const props = defineProps({
     jobs: Object,
+    filters: Object,
 });
+
+const search = ref(props.filters?.search || '');
+
+watch(search, debounce((value) => {
+    router.get(route('jobs.index'), { search: value }, {
+        preserveState: true,
+        replace: true,
+    });
+}, 300));
 
 const getStatusBadge = (status) => {
     const badges = {
@@ -32,11 +43,27 @@ const getStatusBadge = (status) => {
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Job Posting</h2>
                     <p class="text-gray-600 dark:text-gray-400">Manage job vacancies and postings.</p>
                 </div>
-                <Link :href="route('jobs.create')">
-                    <PremiumButton>
-                        Post New Job
-                    </PremiumButton>
-                </Link>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <input 
+                            v-model="search"
+                            type="text" 
+                            placeholder="Search jobs..." 
+                            class="w-64 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500"
+                        >
+                        <svg class="absolute right-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <Link :href="route('jobs.create')">
+                        <PremiumButton class="inline-flex items-center">
+                            <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Post Job
+                        </PremiumButton>
+                    </Link>
+                </div>
             </div>
 
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
@@ -68,7 +95,7 @@ const getStatusBadge = (status) => {
                                     <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                     </svg>
-                                    {{ job.job_category?.name || 'N/A' }}
+                                    {{ job.jobCategory?.name || 'N/A' }}
                                 </div>
                                 <div class="flex items-center">
                                     <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,15 +123,20 @@ const getStatusBadge = (status) => {
                             Showing {{ jobs.from }} to {{ jobs.to }} of {{ jobs.total }} results
                         </div>
                         <div class="flex space-x-2">
-                            <Link v-for="link in jobs.links" :key="link.label" 
-                                  :href="link.url" 
-                                  v-html="link.label"
-                                  :class="[
-                                      'px-3 py-1 rounded-md text-sm',
-                                      link.active ? 'bg-primary-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600',
-                                      !link.url ? 'opacity-50 cursor-not-allowed' : ''
-                                  ]"
-                            />
+                            <template v-for="(link, key) in jobs.links" :key="key">
+                                <Link v-if="link.url" 
+                                      :href="link.url" 
+                                      v-html="link.label"
+                                      :class="[
+                                          'px-3 py-1 rounded-md text-sm',
+                                          link.active ? 'bg-primary-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                                      ]"
+                                />
+                                <span v-else
+                                      v-html="link.label"
+                                      class="px-3 py-1 rounded-md text-sm bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50 border border-gray-200 dark:border-gray-700"
+                                />
+                            </template>
                         </div>
                     </div>
                 </div>

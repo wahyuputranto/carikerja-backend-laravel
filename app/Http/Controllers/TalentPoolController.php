@@ -31,7 +31,7 @@ class TalentPoolController extends Controller
             // });
         }
 
-        $candidates = $query->latest()->paginate(15);
+        $candidates = $query->latest()->paginate(15)->withQueryString();
 
         return Inertia::render('TalentPool/Index', [
             'candidates' => $candidates,

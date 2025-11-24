@@ -13,17 +13,32 @@ use Illuminate\Validation\Rules;
 
 class ClientController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $clientRole = Role::where('slug', 'client')->first();
 
-        $clients = User::where('role_id', $clientRole?->id)
-            ->with('clientProfile')
-            ->latest()
-            ->paginate(10);
+        $query = User::where('role_id', $clientRole?->id)
+            ->with('clientProfile');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'ilike', "%{$search}%")
+                  ->orWhere('email', 'ilike', "%{$search}%")
+                  ->orWhereHas('clientProfile', function ($q2) use ($search) {
+                      $q2->where('company_name', 'ilike', "%{$search}%")
+                         ->orWhere('pic_name', 'ilike', "%{$search}%");
+                  });
+            });
+        }
+
+        $clients = $query->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('Clients/Index', [
             'clients' => $clients,
+            'filters' => $request->only(['search']),
         ]);
     }
 

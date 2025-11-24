@@ -13,11 +13,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->command->info('Starting database seeding...');
+        
         $this->call([
             RoleSeeder::class,
-            MasterDocumentTypeSeeder::class,
             MasterDataSeeder::class,
+            MasterDocumentTypeSeeder::class,
             SuperadminSeeder::class,
+            ClientProfileSeeder::class,
+            CandidateSeeder::class,
+            JobSeeder::class,
         ]);
+
+        $this->command->info('Database seeding completed successfully!');
     }
 }

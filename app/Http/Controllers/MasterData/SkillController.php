@@ -10,10 +10,22 @@ use Illuminate\Support\Str;
 
 class SkillController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $query = Skill::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'ilike', "%{$search}%")
+                  ->orWhere('category', 'ilike', "%{$search}%")
+                  ->orWhere('slug', 'ilike', "%{$search}%");
+            });
+        }
+
         return Inertia::render('MasterData/Skills/Index', [
-            'skills' => Skill::latest()->paginate(10),
+            'skills' => $query->latest()->paginate(10)->withQueryString(),
+            'filters' => $request->only(['search']),
         ]);
     }
 

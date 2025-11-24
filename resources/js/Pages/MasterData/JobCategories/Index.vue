@@ -1,7 +1,7 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, router } from '@inertiajs/vue3';
 import PremiumButton from '@/Components/PremiumButton.vue';
 import Modal from '@/Components/Modal.vue';
 import InputLabel from '@/Components/InputLabel.vue';
@@ -10,6 +10,7 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import InputError from '@/Components/InputError.vue';
 import Pagination from '@/Components/Pagination.vue';
+import { debounce } from 'lodash-es';
 
 defineOptions({
     layout: AppLayout,
@@ -17,7 +18,17 @@ defineOptions({
 
 const props = defineProps({
     jobCategories: Object, // Changed to Object for pagination
+    filters: Object,
 });
+
+const search = ref(props.filters?.search || '');
+
+watch(search, debounce((value) => {
+    router.get(route('master-data.job-categories.index'), { search: value }, {
+        preserveState: true,
+        replace: true,
+    });
+}, 300));
 
 const showModal = ref(false);
 const editingItem = ref(null);
@@ -71,9 +82,25 @@ const deleteItem = (item) => {
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Job Categories</h2>
                     <p class="text-gray-600 dark:text-gray-400">Manage job categories for job postings.</p>
                 </div>
-                <PremiumButton @click="openCreateModal">
-                    Add New Category
-                </PremiumButton>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <input 
+                            v-model="search"
+                            type="text" 
+                            placeholder="Search categories..." 
+                            class="w-64 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500"
+                        >
+                        <svg class="absolute right-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <PremiumButton @click="openCreateModal" class="inline-flex items-center">
+                        <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Add New
+                    </PremiumButton>
+                </div>
             </div>
 
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">

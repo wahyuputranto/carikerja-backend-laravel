@@ -9,11 +9,22 @@ use Inertia\Inertia;
 
 class LocationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $query = Location::with('parent');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'ilike', "%{$search}%")
+                  ->orWhere('type', 'ilike', "%{$search}%");
+            });
+        }
+
         return Inertia::render('MasterData/Locations/Index', [
-            'locations' => Location::with('parent')->latest()->paginate(10),
+            'locations' => $query->latest()->paginate(10)->withQueryString(),
             'parentLocations' => Location::where('type', '!=', 'CITY')->get(),
+            'filters' => $request->only(['search']),
         ]);
     }
 

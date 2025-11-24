@@ -76,7 +76,7 @@ const deleteItem = (item) => {
                     <p class="text-gray-600 dark:text-gray-400">Manage required documents for candidates.</p>
                 </div>
                 <PremiumButton @click="openCreateModal">
-                    Add New Type
+                    Add New
                 </PremiumButton>
             </div>
 

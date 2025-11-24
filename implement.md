@@ -14,6 +14,8 @@ Dokumen ini mencatat langkah-langkah implementasi teknis yang telah dilakukan pa
     - Header dengan User Dropdown & Dark Mode Toggle.
     - Responsive design (Sidebar toggle).
     - Flash Message support (siap menerima data dari backend).
+    - Refactored to a "Flowbite-style" stacked layout with top navigation.
+    - Added icons to navigation links.
 
 ## 3. Routing & Middleware (Inertia)
 - [x] **Route Definition (`web.php`)**:
@@ -35,6 +37,8 @@ Dokumen ini mencatat langkah-langkah implementasi teknis yang telah dilakukan pa
     - `CheckRole` middleware created (`app/Http/Middleware/CheckRole.php`).
     - Registered alias `role` di `bootstrap/app.php`.
     - Penerapan middleware `role:superadmin` pada route `/master-data`.
+- [x] **Policies**:
+    - Created `JobPolicy` to authorize job updates and deletions based on user role (superadmin or job owner).
 
 ## 5. UI Premium & Aesthetics
 - [x] **Design System**:
@@ -55,6 +59,8 @@ Dokumen ini mencatat langkah-langkah implementasi teknis yang telah dilakukan pa
 - [x] **Users & Roles Management**:
     - [x] CRUD Users dengan assignment role.
     - [x] Role selection (Admin, Client, Vendor).
+- [x] **Full Master Data CRUD**:
+    - Created full CRUD interfaces (Controllers, Vue components with modals) for Job Categories, Skills, and Locations.
 
 ## 7. Job Posting & Talent Pool
 - [x] **Job Posting Module**:
@@ -63,12 +69,16 @@ Dokumen ini mencatat langkah-langkah implementasi teknis yang telah dilakukan pa
     - [x] Form input: Judul, Kuota, Deadline, Kategori, Lokasi, Gaji.
     - [x] Halaman listing dengan status badge (DRAFT, PUBLISHED, CLOSED).
     - [x] Menu sidebar untuk Job Posting.
+    - [x] **Role-based Job Creation**: Superadmins can select a client when creating a job; clients have jobs assigned to them automatically.
 - [x] **Talent Pool Module**:
     - [x] Model `Candidate` dengan `hiring_status` field.
     - [x] Controller `TalentPoolController` untuk filter kandidat READY_TO_HIRE.
     - [x] Search functionality (nama, email, phone).
     - [x] Halaman listing kandidat dengan profile preview.
     - [x] Menu sidebar untuk Talent Pool.
+- [x] **Client Listing**:
+    - Created a page to list all clients, visible to superadmins.
+    - Implemented full CRUD functionality for clients (Users + Client Profiles).
 
 ## 8. Completed Features
 - [x] **Job Posting - Create/Edit Form**:
@@ -79,11 +89,6 @@ Dokumen ini mencatat langkah-langkah implementasi teknis yang telah dilakukan pa
     - [x] Halaman detail kandidat lengkap (`TalentPool/Show.vue`).
     - [x] Riwayat pendidikan dan pengalaman kerja.
     - [x] Update hiring status dari detail page.
-- [x] **Seeder Data**:
-    - [x] Master data (Job Categories, Locations, Skills).
-    - [x] Client Profile untuk testing.
-    - [x] 5 Dummy candidates dengan status READY_TO_HIRE.
-    - [x] Complete profiles dengan education dan experience.
 - [x] **Data Integrity**: Semua tabel terkait kandidat (`candidate_profiles`, `candidate_educations`, `candidate_experiences`, `candidate_skills`, `candidate_documents`) memiliki foreign key dengan `onDelete('cascade')`, sehingga menghapus kandidat otomatis menghapus semua data terkait.
 
 ## 9. Next Steps (To-Do)
@@ -93,8 +98,6 @@ Dokumen ini mencatat langkah-langkah implementasi teknis yang telah dilakukan pa
 - [ ] **Candidate Module**:
     - Upload & Review CV.
     - Workflow status lamaran.
-- [ ] **UI Polish**:
-    - Komponen Flash Message UI (Toast).
 - [ ] **Advanced Filters**:
     - Filter Talent Pool by skills, experience level.
     - Filter Jobs by category, location, salary range.
@@ -112,3 +115,13 @@ Dokumen ini mencatat langkah-langkah implementasi teknis yang telah dilakukan pa
 - [x] **Feature: Global Flash/Success Messages**
     - **File:** `resources/js/Layouts/AppLayout.vue`
     - **Change:** Added a new component to the main layout to display success and error messages flashed to the session, making feedback visible to the user across the application.
+- [x] **Bug Fix: Job & Location Dropdowns**
+    - **File:** `database/seeders/DatabaseSeeder.php`
+    - **Change:** Added `MasterDataSeeder` to the main seeder to populate job categories and locations.
+- [x] **Feature: Enhanced Seeding with Factories**
+    - Refactored `ClientProfileSeeder` and `CandidateSeeder` to use factories.
+    - Created a new `JobSeeder` to generate 100 job postings.
+    - Created factories for `ClientProfile`, `Candidate`, `CandidateProfile`, `CandidateEducation`, `CandidateExperience`, and `Job`.
+    - Fixed numerous bugs in models (missing `HasFactory` traits, missing UUID generation) and migrations (missing `quota` and `deadline` columns) that were discovered during the process.
+    - Updated the main `DatabaseSeeder` to call all new and refactored seeders in the correct order.
+

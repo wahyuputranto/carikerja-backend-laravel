@@ -10,10 +10,19 @@ use Illuminate\Support\Str;
 
 class JobCategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $query = JobCategory::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('name', 'ilike', "%{$search}%")
+                  ->orWhere('slug', 'ilike', "%{$search}%");
+        }
+
         return Inertia::render('MasterData/JobCategories/Index', [
-            'jobCategories' => JobCategory::latest()->paginate(10),
+            'jobCategories' => $query->latest()->paginate(10)->withQueryString(),
+            'filters' => $request->only(['search']),
         ]);
     }
 

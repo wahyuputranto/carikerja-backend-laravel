@@ -22,6 +22,8 @@ return new class extends Migration
             $table->foreignId('location_id')->constrained('master_locations');
             $table->decimal('salary_min', 15, 2)->nullable();
             $table->decimal('salary_max', 15, 2)->nullable();
+            $table->integer('quota')->default(1);
+            $table->timestamp('deadline')->nullable();
             $table->enum('status', ['DRAFT', 'PUBLISHED', 'CLOSED'])->default('DRAFT');
             $table->timestamps();
         });

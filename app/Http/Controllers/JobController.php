@@ -13,19 +13,28 @@ use Inertia\Inertia;
 
 class JobController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $query = Job::with(['jobCategory', 'location', 'clientProfile.user']);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'ilike', "%{$search}%")
+                  ->orWhere('description', 'ilike', "%{$search}%");
+            });
+        }
 
         // If user is a client, only show their jobs
         if (auth()->user()->hasRole('client')) {
             $query->where('client_profile_id', auth()->user()->clientProfile->id);
         }
         
-        $jobs = $query->latest()->paginate(15);
+        $jobs = $query->latest()->paginate(15)->withQueryString();
 
         return Inertia::render('Jobs/Index', [
             'jobs' => $jobs,
+            'filters' => $request->only(['search']),
         ]);
     }
 
