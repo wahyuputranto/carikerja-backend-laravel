@@ -98,3 +98,17 @@ Dokumen ini mencatat langkah-langkah implementasi teknis yang telah dilakukan pa
 - [ ] **Advanced Filters**:
     - Filter Talent Pool by skills, experience level.
     - Filter Jobs by category, location, salary range.
+
+## 10. Bug Fixes & Refinements (Sesi Interaktif)
+- [x] **Bug Fix: `JobApplication` Class Not Found**
+    - **File:** `app/Models/Candidate.php`
+    - **Change:** Corrected a `HasMany` relationship to point to the correct `Application::class` instead of the non-existent `JobApplication::class`.
+- [x] **Bug Fix: `applications` Table Not Found**
+    - **File:** `app/Models/Application.php`
+    - **Change:** Updated the `$table` property to `job_applications` to match the database schema.
+- [x] **Feature: Talent Pool Status Update & Redirect**
+    - **File:** `app/Http/Controllers/TalentPoolController.php`
+    - **Change:** Changed the redirect after status update from `redirect()->back()` to `redirect()->route('talent-pool.index')` as per user request.
+- [x] **Feature: Global Flash/Success Messages**
+    - **File:** `resources/js/Layouts/AppLayout.vue`
+    - **Change:** Added a new component to the main layout to display success and error messages flashed to the session, making feedback visible to the user across the application.

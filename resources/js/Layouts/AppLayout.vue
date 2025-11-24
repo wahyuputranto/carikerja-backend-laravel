@@ -101,6 +101,27 @@
                       Users & Roles
                     </inertia-link>
                   </li>
+                  <li>
+                    <inertia-link :href="route('master-data.job-categories.index')"
+                                  class="block px-3 py-2 rounded-lg text-sm transition-colors hover:text-primary-600 dark:hover:text-primary-400"
+                                  :class="{ 'text-primary-600 dark:text-primary-400 font-medium': $page.component.startsWith('MasterData/JobCategories') }">
+                      Job Categories
+                    </inertia-link>
+                  </li>
+                  <li>
+                    <inertia-link :href="route('master-data.skills.index')"
+                                  class="block px-3 py-2 rounded-lg text-sm transition-colors hover:text-primary-600 dark:hover:text-primary-400"
+                                  :class="{ 'text-primary-600 dark:text-primary-400 font-medium': $page.component.startsWith('MasterData/Skills') }">
+                      Skills
+                    </inertia-link>
+                  </li>
+                  <li>
+                    <inertia-link :href="route('master-data.locations.index')"
+                                  class="block px-3 py-2 rounded-lg text-sm transition-colors hover:text-primary-600 dark:hover:text-primary-400"
+                                  :class="{ 'text-primary-600 dark:text-primary-400 font-medium': $page.component.startsWith('MasterData/Locations') }">
+                      Locations
+                    </inertia-link>
+                  </li>
                 </ul>
               </transition>
             </li>
@@ -128,6 +149,19 @@
                      stroke-linejoin="round" stroke-width="2"
                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 Talent Pool
+              </inertia-link>
+            </li>
+            
+            <li v-if="$page.props.auth.role === 'superadmin'">
+                <inertia-link :href="route('clients.index')"
+                            class="flex items-center px-3 py-2 rounded-xl transition-all duration-200 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 dark:hover:text-primary-400 group"
+                            :class="{ 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-medium': $page.component.startsWith('Clients') }">
+                <svg class="h-5 w-5 mr-3 transition-transform group-hover:scale-110"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2"
+                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                Clients
               </inertia-link>
             </li>
           </ul>

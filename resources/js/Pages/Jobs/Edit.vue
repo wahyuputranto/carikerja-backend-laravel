@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import PremiumButton from '@/Components/PremiumButton.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
@@ -17,8 +17,11 @@ const props = defineProps({
     job: Object,
     categories: Array,
     locations: Array,
-    documentTypes: Array,
+    clients: Array,
 });
+
+const page = usePage();
+const isSuperAdmin = page.props.auth.role === 'superadmin';
 
 const form = useForm({
     title: props.job.title,
@@ -26,6 +29,7 @@ const form = useForm({
     requirements: props.job.requirements || '',
     job_category_id: props.job.job_category_id,
     location_id: props.job.location_id,
+    client_profile_id: props.job.client_profile_id,
     salary_min: props.job.salary_min || '',
     salary_max: props.job.salary_max || '',
     quota: props.job.quota,
@@ -61,6 +65,22 @@ const deleteJob = () => {
 
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card">
                 <form @submit.prevent="submit" class="p-6 space-y-6">
+                    <!-- Client Selection (for Superadmin) -->
+                    <div v-if="isSuperAdmin">
+                        <InputLabel for="client_profile_id" value="Client *" />
+                        <select
+                            id="client_profile_id"
+                            v-model="form.client_profile_id"
+                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                            required
+                        >
+                            <option v-for="client in clients" :key="client.id" :value="client.id">
+                                {{ client.company_name }} ({{ client.user.name }})
+                            </option>
+                        </select>
+                        <InputError :message="form.errors.client_profile_id" class="mt-2" />
+                    </div>
+
                     <!-- Job Title -->
                     <div>
                         <InputLabel for="title" value="Job Title *" />
