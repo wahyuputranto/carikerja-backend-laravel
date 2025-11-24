@@ -24,7 +24,7 @@ class SuperadminSeeder extends Seeder
             'id' => \Illuminate\Support\Str::uuid(),
             'role_id' => $superadminRole->id,
             'name' => 'Super Admin',
-            'email' => 'admin@carikerja.com',
+            'email' => 'admin@gmail.com',
             'password' => \Hash::make('password'),
             'email_verified_at' => now(),
             'created_at' => now(),

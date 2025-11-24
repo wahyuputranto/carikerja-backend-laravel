@@ -1,6 +1,14 @@
 
 <template>
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900 font-sans antialiased">
+    <!-- Flash Messages -->
+    <div v-if="flashSuccess && showFlash" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4" role="alert">
+        <p>{{ flashSuccess }}</p>
+    </div>
+    <div v-if="flashError && showFlash" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+        <p>{{ flashError }}</p>
+    </div>
+
     <!-- Header -->
     <header class="bg-white dark:bg-gray-800 shadow-md transition-colors duration-300">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
@@ -139,13 +147,26 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { usePage, Link as InertiaLink, router } from '@inertiajs/vue3'
 import { ZiggyVue } from 'ziggy-js'
 
 const { props } = usePage()
 const user = computed(() => props.auth?.user)
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel'
+
+const flashSuccess = computed(() => usePage().props.flash?.success);
+const flashError = computed(() => usePage().props.flash?.error);
+const showFlash = ref(false);
+
+watch([flashSuccess, flashError], () => {
+    showFlash.value = true;
+    if (flashSuccess.value || flashError.value) {
+        setTimeout(() => {
+            showFlash.value = false;
+        }, 3000);
+    }
+}, { deep: true });
 
 // Theme handling (light / dark)
 const darkMode = ref(localStorage.getItem('darkMode') === 'true')

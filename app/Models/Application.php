@@ -6,6 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Application extends Model
 {
-    protected $table = 'applications';
+    protected $table = 'job_applications';
     protected $guarded = [];
 }

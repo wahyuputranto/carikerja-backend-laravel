@@ -59,8 +59,9 @@ class TalentPoolController extends Controller
             'hiring_status' => 'required|in:AVAILABLE,READY_TO_HIRE,HIRED,NOT_AVAILABLE',
         ]);
 
-        $candidate->update($validated);
+        $candidate->hiring_status = $validated['hiring_status'];
+        $candidate->save();
 
-        return redirect()->back()->with('success', 'Candidate status updated successfully.');
+        return redirect()->route('talent-pool.index')->with('success', 'Candidate status updated successfully.');
     }
 }
