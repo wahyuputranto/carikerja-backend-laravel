@@ -20,6 +20,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Vite::prefetch(concurrency: 3);
+        // Share all permission names for the authenticated user
+        \Inertia\Inertia::share('auth.permissions', function () {
+            return auth()->user()
+                ? auth()->user()->getAllPermissions()->pluck('name')
+                : collect();
+        });
+
+        // Share the current user's role slug (or null if not logged in)
+        \Inertia\Inertia::share('auth.role', function () {
+            return auth()->user() ? optional(auth()->user()->role)->slug : null;
+        });
     }
 }

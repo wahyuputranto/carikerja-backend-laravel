@@ -32,7 +32,7 @@ class SuperadminSeeder extends Seeder
         ]);
 
         $this->command->info('Superadmin user created successfully!');
-        $this->command->info('Email: admin@carikerja.com');
+        $this->command->info('Email: admin@gmail.com');
         $this->command->info('Password: password');
     }
 }
