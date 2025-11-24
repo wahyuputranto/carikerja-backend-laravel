@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class SuperadminSeeder extends Seeder
@@ -15,8 +14,9 @@ class SuperadminSeeder extends Seeder
         // Get superadmin role
         $superadminRole = \DB::table('roles')->where('slug', 'superadmin')->first();
 
-        if (!$superadminRole) {
+        if (! $superadminRole) {
             $this->command->error('Superadmin role not found. Please run RoleSeeder first.');
+
             return;
         }
 
