@@ -1,7 +1,10 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import PremiumButton from '@/Components/PremiumButton.vue';
+import InterviewModal from './Modals/InterviewModal.vue';
+import DeploymentModal from './Modals/DeploymentModal.vue';
+import { ref } from 'vue';
 
 defineOptions({
     layout: AppLayout,
@@ -27,6 +30,47 @@ const getStatusColor = (status) => {
         NOT_AVAILABLE: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
     };
     return colors[status] || colors.AVAILABLE;
+};
+
+// Application Status Logic
+const showInterviewModal = ref(false);
+const showDeploymentModal = ref(false);
+const selectedApplicationId = ref(null);
+const deploymentStage = ref('');
+
+const applicationStatuses = [
+    'APPLIED', 'INTERVIEW', 'OFFERING', 'PROCESSING_VISA', 'DEPLOYED', 'REJECTED'
+];
+
+const handleApplicationStatusChange = (application, event) => {
+    const newStatus = event.target.value;
+    selectedApplicationId.value = application.id;
+
+    if (newStatus === 'INTERVIEW') {
+        showInterviewModal.value = true;
+    } else if (newStatus === 'OFFERING') {
+        deploymentStage.value = 'CONTRACT';
+        showDeploymentModal.value = true;
+    } else if (newStatus === 'PROCESSING_VISA') {
+        deploymentStage.value = 'VISA'; // Default to Visa for now, can be expanded
+        showDeploymentModal.value = true;
+    } else if (newStatus === 'DEPLOYED') {
+        deploymentStage.value = 'FLIGHT';
+        showDeploymentModal.value = true;
+    } else {
+        // Direct update for APPLIED, REJECTED (if no reason needed), etc.
+        router.patch(route('applications.update-status', application.id), {
+            status: newStatus
+        });
+    }
+};
+
+const onModalClose = () => {
+    showInterviewModal.value = false;
+    showDeploymentModal.value = false;
+    selectedApplicationId.value = null;
+    // Refresh page to show updated status
+    router.reload();
 };
 </script>
 
@@ -164,13 +208,41 @@ const getStatusColor = (status) => {
                                 <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ app.job?.title || 'N/A' }}</h3>
                                 <p class="text-sm text-gray-600 dark:text-gray-400">Applied: {{ new Date(app.created_at).toLocaleDateString() }}</p>
                             </div>
-                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                {{ app.status }}
-                            </span>
+                            <div class="flex items-center space-x-3">
+                                <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                    Current: {{ app.status }}
+                                </span>
+                                <!-- Status Dropdown -->
+                                <select 
+                                    :value="app.status"
+                                    @change="handleApplicationStatusChange(app, $event)"
+                                    class="text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                >
+                                    <option v-for="status in applicationStatuses" :key="status" :value="status">
+                                        {{ status }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Modals -->
+        <InterviewModal 
+            :show="showInterviewModal" 
+            :application-id="selectedApplicationId"
+            @close="onModalClose"
+            @submitted="onModalClose"
+        />
+
+        <DeploymentModal
+            :show="showDeploymentModal"
+            :application-id="selectedApplicationId"
+            :stage="deploymentStage"
+            @close="onModalClose"
+            @submitted="onModalClose"
+        />
     </div>
 </template>

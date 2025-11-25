@@ -54,6 +54,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/{candidate}/document-url', [\App\Http\Controllers\TalentPoolController::class, 'getDocumentUrl'])->name('document-url');
     });
 
+    // Application Routes
+    Route::prefix('applications')->name('applications.')->group(function () {
+        Route::patch('/{application}/status', [\App\Http\Controllers\ApplicationController::class, 'updateStatus'])->name('update-status');
+    });
+
+    // Interview Routes
+    Route::post('/interviews/{application}', [\App\Http\Controllers\InterviewController::class, 'store'])->name('interviews.store');
+
+    // Deployment Routes
+    Route::post('/deployments/{application}/{stage}', [\App\Http\Controllers\DeploymentController::class, 'store'])->name('deployments.store');
+
     // Client Routes
     Route::resource('clients', \App\Http\Controllers\ClientController::class)
         ->except(['show'])
