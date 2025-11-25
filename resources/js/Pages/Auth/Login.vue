@@ -38,6 +38,9 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
             <div class="w-full max-w-md space-y-8">
                 <!-- Logo & Title -->
                 <div class="text-center">
+                    <div class="flex justify-center mb-4">
+                        <img src="/images/logo.png" alt="Logo" class="h-16 w-auto" />
+                    </div>
                     <h1 class="text-4xl font-bold text-gray-900 mb-2">
                         {{ appName }}
                     </h1>
@@ -181,10 +184,8 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
                 <div class="max-w-md text-center space-y-6">
                     <!-- Icon/Illustration -->
                     <div class="flex justify-center mb-8">
-                        <div class="w-24 h-24 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center">
-                            <svg class="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                            </svg>
+                        <div class="w-24 h-24 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center p-4">
+                            <img src="/images/logo.png" alt="Logo" class="w-full h-full object-contain" />
                         </div>
                     </div>
 

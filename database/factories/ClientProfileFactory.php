@@ -18,7 +18,7 @@ class ClientProfileFactory extends Factory
     {
         return [
             'company_name' => $this->faker->company(),
-            'industry' => $this->faker->randomElement(['Technology', 'Finance', 'Healthcare', 'Retail', 'Education', 'Manufacturing']),
+            'industry' => $this->faker->randomElement(['Technology', 'Finance', 'Healthcare', 'Retail', 'Education', 'Manufacturing', 'Hospitality', 'Agriculture', 'Plantation', 'Construction']),
             'address' => $this->faker->address(),
             'website' => 'https://' . $this->faker->domainName(),
             'pic_name' => $this->faker->name(),

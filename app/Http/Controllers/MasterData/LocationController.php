@@ -21,10 +21,14 @@ class LocationController extends Controller
             });
         }
 
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
         return Inertia::render('MasterData/Locations/Index', [
             'locations' => $query->latest()->paginate(10)->withQueryString(),
             'parentLocations' => Location::where('type', '!=', 'CITY')->get(),
-            'filters' => $request->only(['search']),
+            'filters' => $request->only(['search', 'type']),
         ]);
     }
 

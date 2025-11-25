@@ -22,9 +22,13 @@ const props = defineProps({
 });
 
 const search = ref(props.filters?.search || '');
+const typeFilter = ref(props.filters?.type || '');
 
-watch(search, debounce((value) => {
-    router.get(route('master-data.locations.index'), { search: value }, {
+watch([search, typeFilter], debounce(([searchValue, typeValue]) => {
+    router.get(route('master-data.locations.index'), { 
+        search: searchValue,
+        type: typeValue 
+    }, {
         preserveState: true,
         replace: true,
     });
@@ -87,6 +91,17 @@ const deleteItem = (item) => {
                     <p class="text-gray-600 dark:text-gray-400">Manage countries, provinces, and cities.</p>
                 </div>
                 <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <select
+                            v-model="typeFilter"
+                            class="w-40 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500"
+                        >
+                            <option value="">All Types</option>
+                            <option value="COUNTRY">Country</option>
+                            <option value="PROVINCE">Province</option>
+                            <option value="CITY">City</option>
+                        </select>
+                    </div>
                     <div class="relative">
                         <input 
                             v-model="search"

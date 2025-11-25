@@ -19,6 +19,7 @@
             <!-- Logo & Brand Name -->
             <div class="flex-shrink-0">
               <InertiaLink :href="route('dashboard')" class="flex items-center space-x-2">
+                <img src="/images/logo.png" alt="Logo" class="h-8 w-auto" />
                 <span class="text-xl font-bold text-gray-800 dark:text-gray-200">{{ appName }}</span>
               </InertiaLink>
             </div>

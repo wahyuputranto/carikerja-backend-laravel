@@ -44,6 +44,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [\App\Http\Controllers\TalentPoolController::class, 'index'])->name('index');
         Route::get('/{candidate}', [\App\Http\Controllers\TalentPoolController::class, 'show'])->name('show');
         Route::patch('/{candidate}/status', [\App\Http\Controllers\TalentPoolController::class, 'updateStatus'])->name('update-status');
+        
+        // Review Actions
+        Route::post('/{candidate}/approve', [\App\Http\Controllers\TalentPoolController::class, 'approve'])->name('approve');
+        Route::post('/{candidate}/reject', [\App\Http\Controllers\TalentPoolController::class, 'reject'])->name('reject');
+        Route::post('/{candidate}/revise', [\App\Http\Controllers\TalentPoolController::class, 'revise'])->name('revise');
+        
+        // Secure Document Viewer
+        Route::post('/{candidate}/document-url', [\App\Http\Controllers\TalentPoolController::class, 'getDocumentUrl'])->name('document-url');
     });
 
     // Client Routes
