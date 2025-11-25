@@ -125,3 +125,22 @@ Dokumen ini mencatat langkah-langkah implementasi teknis yang telah dilakukan pa
     - Fixed numerous bugs in models (missing `HasFactory` traits, missing UUID generation) and migrations (missing `quota` and `deadline` columns) that were discovered during the process.
     - Updated the main `DatabaseSeeder` to call all new and refactored seeders in the correct order.
 
+## 11. Recent Updates (Candidate Review & Master Data)
+- [x] **Candidate Review Module**:
+    - **Smart Table**: Implemented advanced filters (Status, Position, Location) and server-side pagination in `TalentPool/Index.vue`.
+    - **Review Actions**: Added Approve, Reject, and Revise actions with modals.
+    - **Secure Document Viewer**: Implemented `Storage::temporaryUrl` for secure file access.
+    - **Backend Logic**: Updated `TalentPoolController` to handle review actions and filtering.
+- [x] **Master Data Enhancements**:
+    - **Document Types**: Added `stage` column (`REGISTRATION`, `POST_HIRING`) to `master_document_types` via migration and seeder update.
+    - **Locations**: Added Type Filter (Country, Province, City) to `Locations/Index.vue`.
+- [x] **Application Tracking**:
+    - **Schema Update**: Updated `job_applications` table with new status enum (`APPLIED`, `INTERVIEW`, `OFFERING`, `PROCESSING_VISA`, `DEPLOYED`, `REJECTED`) and `current_step` (1-12).
+    - **Seeding**: Created `ApplicationSeeder` to generate realistic application data with mapped statuses and steps.
+- [x] **UI Refinements**:
+    - **Logo Update**: Replaced application logo with new PNG image in Login and Dashboard.
+    - **Login Page**: Redesigned login page with new logo and layout.
+- [x] **Interview Management**:
+    - **Database**: Created `interviews` table with columns for scheduling, type (Online/Offline), meeting link, results, and feedback.
+- [x] **Deployment Pipeline**:
+    - **Database**: Created `deployments` table (One-to-One with `applications`) to track post-hiring steps (Contract, Medical, Legal, E-PMI, Ticketing).

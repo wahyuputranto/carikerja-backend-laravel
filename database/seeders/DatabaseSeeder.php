@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             ClientProfileSeeder::class,
             CandidateSeeder::class,
             JobSeeder::class,
+            ApplicationSeeder::class,
         ]);
 
         $this->command->info('Database seeding completed successfully!');
