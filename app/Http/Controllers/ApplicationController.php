@@ -10,7 +10,7 @@ class ApplicationController extends Controller
     public function updateStatus(Request $request, Application $application)
     {
         $validated = $request->validate([
-            'status' => 'required|string|in:APPLIED,INTERVIEW,OFFERING,PROCESSING_VISA,DEPLOYED,REJECTED',
+            'status' => 'required|string|in:APPLIED,INTERVIEW,OFFERING,HIRED,PROCESSING_VISA,DEPLOYED,REJECTED',
         ]);
 
         $application->update([

@@ -144,3 +144,17 @@ Dokumen ini mencatat langkah-langkah implementasi teknis yang telah dilakukan pa
     - **Database**: Created `interviews` table with columns for scheduling, type (Online/Offline), meeting link, results, and feedback.
 - [x] **Deployment Pipeline**:
     - **Database**: Created `deployments` table (One-to-One with `applications`) to track post-hiring steps (Contract, Medical, Legal, E-PMI, Ticketing).
+- [x] **Recruitment Pipeline Logic**:
+    - **Frontend**: Updated `TalentPool/Show.vue` with Application History and Status Dropdown.
+    - **Conditional Status**: Implemented logic to show different statuses based on country (Indonesia: HIRED, Others: PROCESSING_VISA/DEPLOYED).
+    - **Database**: Added `HIRED` status to `job_applications` enum.
+    - **Modals**: Created `InterviewModal` and `DeploymentModal` for step-specific data entry.
+    - **Controllers**: Created `InterviewController`, `DeploymentController`, and `ApplicationController`.
+- [x] **UI Enhancements**:
+    - **Talent Pool**: Added Client Name and Detailed Location (City, Country) to Application History.
+    - **Job Posting**: Added Client Name and Detailed Location (City, Country) to Job Cards.
+- [x] **Filter & Search Enhancements**:
+    - **Job Posting**: Added filters for Status (DRAFT, PUBLISHED, CLOSED) and Location.
+    - **Talent Pool**: Removed Position filter as per request.
+- [x] **Bug Fixes**:
+    - **JobController**: Fixed `Call to undefined method authorize()` error by updating the base `Controller` to use `AuthorizesRequests` trait.

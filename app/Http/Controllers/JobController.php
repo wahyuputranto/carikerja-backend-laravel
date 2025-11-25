@@ -15,7 +15,7 @@ class JobController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Job::with(['jobCategory', 'location', 'clientProfile.user']);
+        $query = Job::with(['jobCategory', 'location.parent.parent', 'clientProfile.user']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -25,16 +25,26 @@ class JobController extends Controller
             });
         }
 
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('location_id')) {
+            $query->where('location_id', $request->location_id);
+        }
+
         // If user is a client, only show their jobs
         if (auth()->user()->hasRole('client')) {
             $query->where('client_profile_id', auth()->user()->clientProfile->id);
         }
         
         $jobs = $query->latest()->paginate(15)->withQueryString();
+        $locations = Location::where('type', 'CITY')->orderBy('name')->get(['id', 'name']);
 
         return Inertia::render('Jobs/Index', [
             'jobs' => $jobs,
-            'filters' => $request->only(['search']),
+            'filters' => $request->only(['search', 'status', 'location_id']),
+            'locations' => $locations,
         ]);
     }
 

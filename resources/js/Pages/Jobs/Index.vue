@@ -12,12 +12,19 @@ defineOptions({
 const props = defineProps({
     jobs: Object,
     filters: Object,
+    locations: Array,
 });
 
 const search = ref(props.filters?.search || '');
+const status = ref(props.filters?.status || '');
+const location_id = ref(props.filters?.location_id || '');
 
-watch(search, debounce((value) => {
-    router.get(route('jobs.index'), { search: value }, {
+watch([search, status, location_id], debounce(([searchValue, statusValue, locationValue]) => {
+    router.get(route('jobs.index'), { 
+        search: searchValue,
+        status: statusValue,
+        location_id: locationValue
+    }, {
         preserveState: true,
         replace: true,
     });
@@ -38,12 +45,34 @@ const getStatusBadge = (status) => {
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Job Posting</h2>
                     <p class="text-gray-600 dark:text-gray-400">Manage job vacancies and postings.</p>
                 </div>
-                <div class="flex items-center space-x-4">
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- Status Filter -->
+                    <select 
+                        v-model="status" 
+                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                    >
+                        <option value="">All Status</option>
+                        <option value="DRAFT">Draft</option>
+                        <option value="PUBLISHED">Published</option>
+                        <option value="CLOSED">Closed</option>
+                    </select>
+
+                    <!-- Location Filter -->
+                    <select 
+                        v-model="location_id" 
+                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                    >
+                        <option value="">All Locations</option>
+                        <option v-for="loc in locations" :key="loc.id" :value="loc.id">
+                            {{ loc.name }}
+                        </option>
+                    </select>
+
                     <div class="relative">
                         <input 
                             v-model="search"
@@ -79,9 +108,13 @@ const getStatusBadge = (status) => {
                                 </span>
                             </div>
                             
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                                 {{ job.title }}
                             </h3>
+                            
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                                {{ job.client_profile?.company_name || 'Unknown Client' }}
+                            </p>
                             
                             <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
                                 <div class="flex items-center">
@@ -89,7 +122,7 @@ const getStatusBadge = (status) => {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                     </svg>
-                                    {{ job.location?.name || 'N/A' }}
+                                    {{ job.location?.name }}, {{ job.location?.parent?.parent?.name }}
                                 </div>
                                 <div class="flex items-center">
                                     <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -70,7 +70,8 @@ class TalentPoolController extends Controller
             'profile',
             'educations',
             'experiences',
-            'applications.job',
+            'applications.job.clientProfile',
+            'applications.job.location.parent.parent',
         ]);
 
         return Inertia::render('TalentPool/Show', [

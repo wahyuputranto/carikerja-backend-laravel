@@ -17,17 +17,16 @@ const props = defineProps({
 });
 
 // Search and filters
+// Search and filters
 const search = ref(props.filters?.search || '');
 const selectedStatus = ref(props.filters?.status || '');
-const selectedPosition = ref(props.filters?.position || '');
 const selectedLocation = ref(props.filters?.location || '');
 
 // Watch for filter changes
-watch([search, selectedStatus, selectedPosition, selectedLocation], debounce(([searchVal, status, position, location]) => {
+watch([search, selectedStatus, selectedLocation], debounce(([searchVal, status, location]) => {
     router.get(route('talent-pool.index'), {
         search: searchVal,
         status: status,
-        position: position,
         location: location,
     }, {
         preserveState: true,
@@ -96,7 +95,6 @@ const submitRevise = () => {
 const clearFilters = () => {
     search.value = '';
     selectedStatus.value = '';
-    selectedPosition.value = '';
     selectedLocation.value = '';
 };
 
@@ -161,20 +159,6 @@ const getApplicationStatusBadgeClass = (status) => {
                             <option value="">All Statuses</option>
                             <option v-for="status in filterOptions.statuses" :key="status.value" :value="status.value">
                                 {{ status.label }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- Position Filter -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Position</label>
-                        <select 
-                            v-model="selectedPosition"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500"
-                        >
-                            <option value="">All Positions</option>
-                            <option v-for="job in filterOptions.jobs" :key="job.id" :value="job.id">
-                                {{ job.title }}
                             </option>
                         </select>
                     </div>

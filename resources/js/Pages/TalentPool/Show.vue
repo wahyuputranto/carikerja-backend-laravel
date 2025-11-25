@@ -38,9 +38,16 @@ const showDeploymentModal = ref(false);
 const selectedApplicationId = ref(null);
 const deploymentStage = ref('');
 
-const applicationStatuses = [
-    'APPLIED', 'INTERVIEW', 'OFFERING', 'PROCESSING_VISA', 'DEPLOYED', 'REJECTED'
-];
+const getAvailableStatuses = (application) => {
+    const country = application.job?.location?.parent?.parent?.name || '';
+    const isIndonesia = country.toLowerCase() === 'indonesia';
+
+    if (isIndonesia) {
+        return ['APPLIED', 'INTERVIEW', 'OFFERING', 'HIRED', 'REJECTED'];
+    } else {
+        return ['APPLIED', 'INTERVIEW', 'OFFERING', 'PROCESSING_VISA', 'DEPLOYED', 'REJECTED'];
+    }
+};
 
 const handleApplicationStatusChange = (application, event) => {
     const newStatus = event.target.value;
@@ -52,13 +59,12 @@ const handleApplicationStatusChange = (application, event) => {
         deploymentStage.value = 'CONTRACT';
         showDeploymentModal.value = true;
     } else if (newStatus === 'PROCESSING_VISA') {
-        deploymentStage.value = 'VISA'; // Default to Visa for now, can be expanded
+        deploymentStage.value = 'VISA'; 
         showDeploymentModal.value = true;
     } else if (newStatus === 'DEPLOYED') {
         deploymentStage.value = 'FLIGHT';
         showDeploymentModal.value = true;
     } else {
-        // Direct update for APPLIED, REJECTED (if no reason needed), etc.
         router.patch(route('applications.update-status', application.id), {
             status: newStatus
         });
@@ -69,7 +75,6 @@ const onModalClose = () => {
     showInterviewModal.value = false;
     showDeploymentModal.value = false;
     selectedApplicationId.value = null;
-    // Refresh page to show updated status
     router.reload();
 };
 </script>
@@ -206,7 +211,19 @@ const onModalClose = () => {
                         <div v-for="app in candidate.applications" :key="app.id" class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div>
                                 <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ app.job?.title || 'N/A' }}</h3>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">Applied: {{ new Date(app.created_at).toLocaleDateString() }}</p>
+                                <div class="mt-1 text-sm">
+                                    <p class="font-medium text-gray-700 dark:text-gray-300">
+                                        Company: {{ app.job?.client_profile?.company_name || 'Unknown Client' }}
+                                    </p>
+                                    <p class="text-gray-500 dark:text-gray-400 flex items-center mt-0.5">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        {{ app.job?.location?.name }}, {{ app.job?.location?.parent?.parent?.name }}
+                                    </p>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-500 mt-2">Applied: {{ new Date(app.created_at).toLocaleDateString() }}</p>
                             </div>
                             <div class="flex items-center space-x-3">
                                 <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
@@ -218,7 +235,7 @@ const onModalClose = () => {
                                     @change="handleApplicationStatusChange(app, $event)"
                                     class="text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                 >
-                                    <option v-for="status in applicationStatuses" :key="status" :value="status">
+                                    <option v-for="status in getAvailableStatuses(app)" :key="status" :value="status">
                                         {{ status }}
                                     </option>
                                 </select>
