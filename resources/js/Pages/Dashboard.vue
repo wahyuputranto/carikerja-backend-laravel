@@ -117,7 +117,7 @@ const formatDate = (dateString) => {
                     </div>
                     <div class="p-6">
                         <div v-if="recentJobs.length > 0" class="space-y-4">
-                            <div v-for="job in recentJobs" :key="job.id" class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <Link v-for="job in recentJobs" :key="job.id" :href="route('jobs.edit', job.id)" class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                                 <div>
                                     <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ job.title }}</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ job.location?.name }} • {{ job.job_category?.name }}</p>
@@ -132,7 +132,7 @@ const formatDate = (dateString) => {
                                     </span>
                                     <p class="text-xs text-gray-400 mt-1">{{ formatDate(job.created_at) }}</p>
                                 </div>
-                            </div>
+                            </Link>
                         </div>
                         <div v-else class="text-center text-gray-500 dark:text-gray-400 py-4">
                             No recent jobs found.
@@ -148,7 +148,7 @@ const formatDate = (dateString) => {
                     </div>
                     <div class="p-6">
                         <div v-if="recentCandidates.length > 0" class="space-y-4">
-                            <div v-for="candidate in recentCandidates" :key="candidate.id" class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <Link v-for="candidate in recentCandidates" :key="candidate.id" :href="route('talent-pool.show', candidate.id)" class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                                 <div class="flex items-center space-x-3">
                                     <div class="h-10 w-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 font-bold">
                                         {{ candidate.name.charAt(0).toUpperCase() }}
@@ -168,7 +168,7 @@ const formatDate = (dateString) => {
                                         {{ candidate.hiring_status.replace(/_/g, ' ') }}
                                     </span>
                                 </div>
-                            </div>
+                            </Link>
                         </div>
                         <div v-else class="text-center text-gray-500 dark:text-gray-400 py-4">
                             No recent candidates found.

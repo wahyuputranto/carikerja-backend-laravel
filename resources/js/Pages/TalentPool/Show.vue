@@ -125,6 +125,18 @@ const onModalClose = () => {
     router.reload();
 };
 
+// Collapsible state for each application's details
+const expandedInterviews = ref({});
+const expandedOfferings = ref({});
+
+const toggleInterview = (appId) => {
+    expandedInterviews.value[appId] = !expandedInterviews.value[appId];
+};
+
+const toggleOffering = (appId) => {
+    expandedOfferings.value[appId] = !expandedOfferings.value[appId];
+};
+
 // Helper for date formatting
 const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -391,28 +403,45 @@ const formatDate = (dateString) => {
                                     ></div>
                                     
                                     <div class="pl-4">
-                                        <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
-                                            Interview Scheduled
-                                            <!-- Dynamic Badge -->
-                                            <span v-if="['OFFERING', 'HIRED', 'PROCESSING_VISA', 'DEPLOYED'].includes(app.status)" 
-                                                  class="ml-2 text-[10px] px-2 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full uppercase tracking-wide">
-                                                Passed
-                                            </span>
-                                            <span v-else-if="app.status === 'REJECTED'" 
-                                                  class="ml-2 text-[10px] px-2 py-0.5 bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 rounded-full uppercase tracking-wide">
-                                                Rejected
-                                            </span>
-                                            <span v-else-if="new Date(app.interview_date) < new Date()" 
-                                                  class="ml-2 text-[10px] px-2 py-0.5 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 rounded-full uppercase tracking-wide">
-                                                Pending Feedback
-                                            </span>
-                                            <span v-else 
-                                                  class="ml-2 text-[10px] px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded-full uppercase tracking-wide">
-                                                Upcoming
-                                            </span>
-                                        </h4>
+                                        <!-- Collapsible Header -->
+                                        <button 
+                                            @click="toggleInterview(app.id)" 
+                                            class="w-full flex items-center justify-between mb-3 hover:opacity-80 transition-opacity"
+                                        >
+                                            <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center">
+                                                Interview Scheduled
+                                                <!-- Dynamic Badge -->
+                                                <span v-if="['OFFERING', 'HIRED', 'PROCESSING_VISA', 'DEPLOYED'].includes(app.status)" 
+                                                      class="ml-2 text-[10px] px-2 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full uppercase tracking-wide">
+                                                    Passed
+                                                </span>
+                                                <span v-else-if="app.status === 'REJECTED'" 
+                                                      class="ml-2 text-[10px] px-2 py-0.5 bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 rounded-full uppercase tracking-wide">
+                                                    Rejected
+                                                </span>
+                                                <span v-else-if="new Date(app.interview_date) < new Date()" 
+                                                      class="ml-2 text-[10px] px-2 py-0.5 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 rounded-full uppercase tracking-wide">
+                                                    Pending Feedback
+                                                </span>
+                                                <span v-else 
+                                                      class="ml-2 text-[10px] px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded-full uppercase tracking-wide">
+                                                    Upcoming
+                                                </span>
+                                            </h4>
+                                            <svg 
+                                                class="w-5 h-5 text-gray-500 transition-transform"
+                                                :class="{ 'rotate-180': expandedInterviews[app.id] }"
+                                                fill="none" 
+                                                stroke="currentColor" 
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
                                         
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Collapsible Content -->
+                                        <div v-show="expandedInterviews[app.id]" class="space-y-4">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <!-- Time -->
                                             <div class="flex items-start">
                                                 <div class="bg-indigo-50 dark:bg-indigo-900/20 p-2 rounded-lg mr-3">
@@ -451,23 +480,23 @@ const formatDate = (dateString) => {
                                                 <span class="font-semibold not-italic text-gray-500 text-xs uppercase mr-1">Note:</span>
                                                 {{ app.interview_notes }}
                                             </div>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <!-- Feedback Display -->
-                                    <div v-if="app.interview_feedback" class="mt-6 ml-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                                        <h5 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 flex items-center">
-                                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                            Interviewer Feedback
-                                        </h5>
-                                        <div class="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30 rounded-lg p-4">
-                                            <p class="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{{ app.interview_feedback }}</p>
+                                        <!-- Feedback Display -->
+                                        <div v-if="app.interview_feedback" v-show="expandedInterviews[app.id]" class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+                                            <h5 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 flex items-center">
+                                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                Interviewer Feedback
+                                            </h5>
+                                            <div class="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30 rounded-lg p-4">
+                                                <p class="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{{ app.interview_feedback }}</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
                                 <!-- Empty State -->
-                                <div v-else class="flex flex-col items-center justify-center py-8 text-center bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
+                                <div v-if="!app.interview_date" class="flex flex-col items-center justify-center py-8 text-center bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
                                     <div class="bg-white dark:bg-gray-800 p-3 rounded-full shadow-sm mb-3">
                                         <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -486,14 +515,31 @@ const formatDate = (dateString) => {
 
                             <!-- Offering & Contract Details Section -->
                             <div v-if="['OFFERING', 'HIRED', 'PROCESSING_VISA', 'DEPLOYED'].includes(app.status) && app.deployment" class="mt-4 p-5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                                <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                                    <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                                <!-- Collapsible Header -->
+                                <button 
+                                    @click="toggleOffering(app.id)" 
+                                    class="w-full flex items-center justify-between mb-4 hover:opacity-80 transition-opacity"
+                                >
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center">
+                                        <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                                        </svg>
+                                        Offering & Contract Details
+                                    </h4>
+                                    <svg 
+                                        class="w-5 h-5 text-gray-500 transition-transform"
+                                        :class="{ 'rotate-180': expandedOfferings[app.id] }"
+                                        fill="none" 
+                                        stroke="currentColor" 
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                     </svg>
-                                    Offering & Contract Details
-                                </h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-purple-50 dark:bg-purple-900/10 p-4 rounded-lg border border-purple-100 dark:border-purple-800/30">
+                                </button>
+
+                                <!-- Collapsible Content -->
+                                <div v-show="expandedOfferings[app.id]" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-purple-50 dark:bg-purple-900/10 p-4 rounded-lg border border-purple-100 dark:border-purple-800/30">
                                     <div>
                                         <p class="text-gray-500 dark:text-gray-400 text-xs uppercase font-semibold">Contract Number</p>
                                         <p class="font-bold text-gray-900 dark:text-gray-200 mt-0.5">{{ app.deployment.contract_number }}</p>
@@ -527,8 +573,9 @@ const formatDate = (dateString) => {
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Modals -->
+    <!-- Modals -->
         <InterviewModal 
             :show="showInterviewModal" 
             :application="selectedApplication"
