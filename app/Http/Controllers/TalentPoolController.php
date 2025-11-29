@@ -70,6 +70,7 @@ class TalentPoolController extends Controller
             'profile',
             'educations',
             'experiences',
+            'documents.documentType',
             'applications.job.clientProfile',
             'applications.job.location.parent.parent',
         ]);

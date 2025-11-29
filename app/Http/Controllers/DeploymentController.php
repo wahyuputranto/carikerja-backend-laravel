@@ -18,6 +18,7 @@ class DeploymentController extends Controller
                 'signed_at' => 'required|date',
                 'start_date' => 'required|date',
                 'end_date' => 'required|date',
+                'offering_letter' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // Add file validation
             ];
         } elseif ($stage === 'MEDICAL') {
             $rules = [
@@ -44,6 +45,15 @@ class DeploymentController extends Controller
         $deployment = Deployment::firstOrCreate(
             ['application_id' => $application->id]
         );
+
+        // Handle File Upload for CONTRACT stage
+        if ($stage === 'CONTRACT' && $request->hasFile('offering_letter')) {
+            $path = $request->file('offering_letter')->store('offering-letters', 'minio'); // Use 'minio' disk
+            $application->update(['offering_letter_path' => $path]);
+        }
+
+        // Remove file from validated array before updating deployment model (since it's not in deployment table)
+        unset($validated['offering_letter']);
 
         $deployment->update($validated);
 

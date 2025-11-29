@@ -54,6 +54,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/{candidate}/document-url', [\App\Http\Controllers\TalentPoolController::class, 'getDocumentUrl'])->name('document-url');
     });
 
+    // Candidate Document Routes
+    Route::prefix('candidate-documents')->name('candidate-documents.')->group(function () {
+        Route::post('/{document}/approve', [\App\Http\Controllers\CandidateDocumentController::class, 'approve'])->name('approve');
+        Route::post('/{document}/reject', [\App\Http\Controllers\CandidateDocumentController::class, 'reject'])->name('reject');
+    });
+
     // Application Routes
     Route::prefix('applications')->name('applications.')->group(function () {
         Route::patch('/{application}/status', [\App\Http\Controllers\ApplicationController::class, 'updateStatus'])->name('update-status');
@@ -61,9 +67,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Interview Routes
     Route::post('/interviews/{application}', [\App\Http\Controllers\InterviewController::class, 'store'])->name('interviews.store');
+    Route::post('/interviews/{application}/feedback', [\App\Http\Controllers\InterviewController::class, 'storeFeedback'])->name('interviews.feedback');
 
     // Deployment Routes
     Route::post('/deployments/{application}/{stage}', [\App\Http\Controllers\DeploymentController::class, 'store'])->name('deployments.store');
+
+    // Admin Notification Routes
+    Route::prefix('admin-notifications')->name('admin-notifications.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AdminNotificationController::class, 'index'])->name('index');
+        Route::post('/{id}/read', [\App\Http\Controllers\AdminNotificationController::class, 'markAsRead'])->name('mark-read');
+        Route::post('/read-all', [\App\Http\Controllers\AdminNotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+    });
 
     // Client Routes
     Route::resource('clients', \App\Http\Controllers\ClientController::class)

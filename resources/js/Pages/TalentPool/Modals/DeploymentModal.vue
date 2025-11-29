@@ -22,6 +22,7 @@ const form = useForm({
     signed_at: '',
     start_date: '',
     end_date: '',
+    offering_letter: null, // New field for file upload
     
     // Medical
     medical_status: 'PENDING',
@@ -51,6 +52,7 @@ const submit = () => {
             emit('submitted');
             emit('close');
         },
+        forceFormData: true, // Ensure FormData is used for file upload
     });
 };
 
@@ -88,6 +90,28 @@ const close = () => {
                             <InputLabel for="end_date" value="End Date" />
                             <TextInput id="end_date" type="date" class="mt-1 block w-full" v-model="form.end_date" required />
                         </div>
+                    </div>
+                    
+                    <!-- Offering Letter Upload -->
+                    <div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-lg border border-blue-100 dark:border-blue-800/30">
+                        <InputLabel for="offering_letter" value="Upload Offering Letter / Contract (PDF/DOC)" class="mb-1.5" />
+                        <input 
+                            type="file" 
+                            id="offering_letter"
+                            @change="form.offering_letter = $event.target.files[0]"
+                            class="block w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-blue-50 file:text-blue-700
+                                hover:file:bg-blue-100
+                                dark:file:bg-blue-900 dark:file:text-blue-300"
+                            accept=".pdf,.doc,.docx"
+                        />
+                        <progress v-if="form.progress" :value="form.progress.percentage" max="100" class="mt-2 w-full h-1 bg-gray-200 rounded-full overflow-hidden">
+                            {{ form.progress.percentage }}%
+                        </progress>
+                        <InputError :message="form.errors.offering_letter" class="mt-2" />
                     </div>
                 </div>
 

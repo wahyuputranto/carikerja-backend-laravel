@@ -64,4 +64,9 @@ class Candidate extends Model
     {
         return $this->hasMany(Application::class);
     }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class);
+    }
 }

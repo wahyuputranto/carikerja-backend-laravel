@@ -60,6 +60,17 @@ return [
             'report' => false,
         ],
 
+        'minio' => [
+            'driver' => 's3',
+            'key' => env('MINIO_ACCESS_KEY', 'minioadmin'),
+            'secret' => env('MINIO_SECRET_KEY', 'minioadmin'),
+            'region' => 'us-east-1',
+            'bucket' => env('MINIO_BUCKET', 'agency-documents'),
+            'endpoint' => env('MINIO_ENDPOINT', 'http://127.0.0.1:9000'),
+            'use_path_style_endpoint' => true,
+            'throw' => false,
+        ],
+
     ],
 
     /*

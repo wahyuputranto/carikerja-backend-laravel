@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Internal API Key
+    |--------------------------------------------------------------------------
+    |
+    | This key is used for internal service-to-service communication between
+    | Go backend and Laravel backend. Should be a secure random string.
+    |
+    */
+
+    'internal_api_key' => env('INTERNAL_API_KEY', 'change-this-in-production'),
+
 ];

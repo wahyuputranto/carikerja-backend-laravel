@@ -78,8 +78,11 @@
             </div>
           </div>
 
-          <!-- Right side: User menu, theme toggle -->
+          <!-- Right side: Notification, User menu, theme toggle -->
           <div class="flex items-center space-x-3">
+            <!-- Notification Bell -->
+            <NotificationBell />
+            
             <button @click="toggleTheme" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
               <svg v-if="!darkMode" class="h-6 w-6 text-gray-800 dark:text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
               <svg v-else class="h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m8.66-9.66l-.71.71M4.05 19.95l-.71-.71M21 12h-1M4 12H3m15.66 5.66l-.71-.71M4.05 4.05l-.71.71" /></svg>
@@ -262,6 +265,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { usePage, Link as InertiaLink, router } from '@inertiajs/vue3'
 import Dropdown from '@/Components/Dropdown.vue'
 import DropdownLink from '@/Components/DropdownLink.vue'
+import NotificationBell from '@/Components/NotificationBell.vue'
 
 const { props } = usePage()
 const user = computed(() => props.auth?.user)
