@@ -46,7 +46,7 @@ watch(() => props.show, (newVal) => {
 });
 
 const submit = () => {
-    form.post(route('deployments.store', { applicationId: props.applicationId, stage: props.stage }), {
+    form.post(route('deployments.store', { application: props.applicationId, stage: props.stage }), {
         onSuccess: () => {
             form.reset();
             emit('submitted');

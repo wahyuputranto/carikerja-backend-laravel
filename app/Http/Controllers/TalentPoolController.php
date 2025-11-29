@@ -73,6 +73,7 @@ class TalentPoolController extends Controller
             'documents.documentType',
             'applications.job.clientProfile',
             'applications.job.location.parent.parent',
+            'applications.deployment', // Load deployment details
         ]);
 
         return Inertia::render('TalentPool/Show', [

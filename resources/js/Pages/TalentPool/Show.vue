@@ -349,6 +349,19 @@ const formatDate = (dateString) => {
                                             </svg>
                                         </button>
 
+                                        <!-- Manage Offering / Contract -->
+                                        <button 
+                                            v-if="app.status === 'OFFERING'"
+                                            @click="selectedApplication = app; deploymentStage = 'CONTRACT'; showDeploymentModal = true"
+                                            class="p-2 rounded-full hover:bg-purple-50 text-gray-400 hover:text-purple-600 dark:hover:bg-purple-900/30 dark:hover:text-purple-400 transition-all"
+                                            title="Manage Offering & Contract Details"
+                                        >
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                                            </svg>
+                                        </button>
+
                                         <!-- Feedback -->
                                         <button 
                                             v-if="app.status === 'INTERVIEW' && app.interview_date"
@@ -468,6 +481,45 @@ const formatDate = (dateString) => {
                                     >
                                         Schedule Now
                                     </button>
+                                </div>
+                            </div>
+
+                            <!-- Offering & Contract Details Section -->
+                            <div v-if="['OFFERING', 'HIRED', 'PROCESSING_VISA', 'DEPLOYED'].includes(app.status) && app.deployment" class="mt-4 p-5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                                    <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                                    </svg>
+                                    Offering & Contract Details
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-purple-50 dark:bg-purple-900/10 p-4 rounded-lg border border-purple-100 dark:border-purple-800/30">
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 text-xs uppercase font-semibold">Contract Number</p>
+                                        <p class="font-bold text-gray-900 dark:text-gray-200 mt-0.5">{{ app.deployment.contract_number }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 text-xs uppercase font-semibold">Signed Date</p>
+                                        <p class="font-medium text-gray-900 dark:text-gray-200 mt-0.5">{{ formatDate(app.deployment.signed_at) }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 text-xs uppercase font-semibold">Duration</p>
+                                        <p class="font-medium text-gray-900 dark:text-gray-200 mt-0.5">
+                                            {{ formatDate(app.deployment.start_date) }} - {{ formatDate(app.deployment.end_date) }}
+                                        </p>
+                                    </div>
+                                    <div v-if="app.offering_letter_path">
+                                        <p class="text-gray-500 dark:text-gray-400 text-xs uppercase font-semibold mb-1">Document</p>
+                                        <button 
+                                            @click="viewDocument({ file_path: app.offering_letter_path })"
+                                            class="flex items-center text-xs font-bold text-purple-700 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300 bg-white dark:bg-gray-800 px-3 py-1.5 rounded border border-purple-200 dark:border-purple-700 shadow-sm transition-all"
+                                        >
+                                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                            </svg>
+                                            Download Offering Letter
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
