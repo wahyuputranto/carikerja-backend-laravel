@@ -295,6 +295,7 @@ const formatDate = (dateString) => {
                                     }" class="font-semibold">{{ doc.status }}</span>
                                 </p>
                                 <p v-if="doc.rejection_note" class="text-xs text-red-500 mt-1">Note: {{ doc.rejection_note }}</p>
+                                <p class="text-xs text-gray-400 mt-1">Last Uploaded: {{ formatDate(doc.updated_at) }}</p>
                             </div>
                             <div class="flex flex-col space-y-2">
                                 <button @click="viewDocument(doc)" class="text-blue-600 hover:text-blue-800 text-sm font-medium text-right">View</button>

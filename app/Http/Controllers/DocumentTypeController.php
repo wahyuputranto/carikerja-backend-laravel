@@ -53,7 +53,14 @@ class DocumentTypeController extends Controller
 
     public function destroy(DocumentType $documentType)
     {
-        $documentType->delete();
-        return redirect()->back()->with('success', 'Document Type deleted successfully.');
+        try {
+            $documentType->delete();
+            return redirect()->back()->with('success', 'Document Type deleted successfully.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23503') {
+                return redirect()->back()->with('error', 'Cannot delete this Document Type because it is currently assigned to one or more candidates.');
+            }
+            throw $e;
+        }
     }
 }
