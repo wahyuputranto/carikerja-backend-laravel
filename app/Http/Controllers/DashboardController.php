@@ -37,7 +37,20 @@ class DashboardController extends Controller
             $recentCandidates = Candidate::with('profile')
                 ->latest()
                 ->take(5)
-                ->get();
+                ->get()
+                ->map(function ($candidate) {
+                    if ($candidate->profile && $candidate->profile->photo_url) {
+                        try {
+                            $candidate->profile->photo_url = \Storage::disk('minio')->temporaryUrl(
+                                $candidate->profile->photo_url,
+                                now()->addMinutes(60)
+                            );
+                        } catch (\Exception $e) {
+                            // Log error or keep original URL
+                        }
+                    }
+                    return $candidate;
+                });
 
         } elseif ($user->hasRole('client')) {
             // Client Stats

@@ -122,17 +122,17 @@ const getApplicationStatusBadgeClass = (status) => {
 <template>
     <Head title="Talent Pool" />
     
-    <div class="py-12">
+    <div class="py-6 sm:py-12 px-4 sm:px-0">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Header -->
             <div class="mb-6">
-                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Talent Pool</h2>
-                <p class="text-gray-600 dark:text-gray-400">Review and manage candidate applications</p>
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-200">Talent Pool</h2>
+                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">Review and manage candidate applications</p>
             </div>
 
             <!-- Filters -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6 mb-6">
+                <div class="space-y-4">
                     <!-- Search -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Search</label>
@@ -141,37 +141,40 @@ const getApplicationStatusBadgeClass = (status) => {
                                 v-model="search"
                                 type="text" 
                                 placeholder="Name, email, phone..." 
-                                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500"
+                                class="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 text-sm"
                             >
-                            <svg class="absolute right-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
                         </div>
                     </div>
 
-                    <!-- Status Filter -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
-                        <select 
-                            v-model="selectedStatus"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500"
-                        >
-                            <option value="">All Statuses</option>
-                            <option v-for="status in filterOptions.statuses" :key="status.value" :value="status.value">
-                                {{ status.label }}
-                            </option>
-                        </select>
-                    </div>
+                    <!-- Status & Location in one row on larger screens -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Status Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                            <select 
+                                v-model="selectedStatus"
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                            >
+                                <option value="">All Statuses</option>
+                                <option v-for="status in filterOptions.statuses" :key="status.value" :value="status.value">
+                                    {{ status.label }}
+                                </option>
+                            </select>
+                        </div>
 
-                    <!-- Location Filter -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Location</label>
-                        <input 
-                            v-model="selectedLocation"
-                            type="text"
-                            placeholder="City name..."
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500"
-                        >
+                        <!-- Location Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Location</label>
+                            <input 
+                                v-model="selectedLocation"
+                                type="text"
+                                placeholder="City name..."
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                            >
+                        </div>
                     </div>
                 </div>
 
@@ -179,15 +182,88 @@ const getApplicationStatusBadgeClass = (status) => {
                 <div class="mt-4 flex justify-end">
                     <button 
                         @click="clearFilters"
-                        class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
+                        class="text-xs sm:text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
                     >
                         Clear Filters
                     </button>
                 </div>
             </div>
 
-            <!-- Candidates Table -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <!-- Candidates - Mobile Card View (hidden on sm and up) -->
+            <div class="sm:hidden space-y-4 mb-6">
+                <div v-for="candidate in candidates.data" :key="candidate.id" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+                    <!-- Candidate Info -->
+                    <div class="flex items-center mb-4">
+                        <img v-if="candidate.profile?.photo_url" class="h-12 w-12 rounded-full object-cover border border-gray-200 dark:border-gray-700" :src="candidate.profile.photo_url" :alt="candidate.name">
+                        <img v-else class="h-12 w-12 rounded-full" :src="`https://ui-avatars.com/api/?name=${candidate.name}`" alt="">
+                        <div class="ml-3 flex-1">
+                            <div class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ candidate.name }}</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ candidate.profile?.city || 'N/A' }}</div>
+                        </div>
+                        <span :class="getStatusBadgeClass(candidate.hiring_status)" class="px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap">
+                            {{ candidate.hiring_status.replace('_', ' ') }}
+                        </span>
+                    </div>
+
+                    <!-- Contact -->
+                    <div class="mb-4 space-y-1">
+                        <div class="text-sm text-gray-900 dark:text-gray-100">{{ candidate.email }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ candidate.phone }}</div>
+                    </div>
+
+                    <!-- Applications -->
+                    <div v-if="candidate.applications && candidate.applications.length > 0" class="mb-4">
+                        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Applications</div>
+                        <div class="space-y-3">
+                            <div v-for="app in candidate.applications" :key="app.id" class="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                                <div class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">{{ app.job?.title || 'N/A' }}</div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span :class="getApplicationStatusBadgeClass(app.status)" class="px-2 py-0.5 text-xs font-semibold rounded-full">
+                                        {{ app.status.replace('_', ' ') }}
+                                    </span>
+                                </div>
+                                <!-- Review Actions for Pending Applications -->
+                                <div v-if="app.status === 'PENDING'" class="flex space-x-2">
+                                    <button 
+                                        @click="approveCandidate(candidate, app)"
+                                        class="flex-1 text-xs px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 font-medium"
+                                    >
+                                        Approve
+                                    </button>
+                                    <button 
+                                        @click="openReviseModal(candidate, app)"
+                                        class="flex-1 text-xs px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400 font-medium"
+                                    >
+                                        Revise
+                                    </button>
+                                    <button 
+                                        @click="openRejectModal(candidate, app)"
+                                        class="flex-1 text-xs px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 font-medium"
+                                    >
+                                        Reject
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="mb-4 text-sm text-gray-500 dark:text-gray-400">No applications</div>
+
+                    <!-- View Details Button -->
+                    <Link 
+                        :href="route('talent-pool.show', candidate.id)"
+                        class="block w-full text-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm font-medium"
+                    >
+                        View Details
+                    </Link>
+                </div>
+
+                <div v-if="candidates.data.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
+                    No candidates found.
+                </div>
+            </div>
+
+            <!-- Candidates Table - Desktop (hidden on mobile, shown on sm and up) -->
+            <div class="hidden sm:block bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700">
@@ -205,7 +281,8 @@ const getApplicationStatusBadgeClass = (status) => {
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0 h-10 w-10">
-                                            <img class="h-10 w-10 rounded-full" :src="`https://ui-avatars.com/api/?name=${candidate.name}`" alt="">
+                                            <img v-if="candidate.profile?.photo_url" class="h-10 w-10 rounded-full object-cover border border-gray-200 dark:border-gray-700" :src="candidate.profile.photo_url" :alt="candidate.name">
+                                            <img v-else class="h-10 w-10 rounded-full" :src="`https://ui-avatars.com/api/?name=${candidate.name}`" alt="">
                                         </div>
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ candidate.name }}</div>

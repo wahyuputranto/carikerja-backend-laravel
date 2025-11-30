@@ -175,7 +175,7 @@
 
             <!-- Master Data Dropdown in Mobile -->
             <div v-if="$page.props.auth.role === 'superadmin'" class="space-y-1">
-              <button @click="isMasterDataOpen = !isMasterDataOpen" class="mobile-nav-link w-full text-left flex items-center justify-between">
+              <button @click="isMasterDataOpen = !isMasterDataOpen" class="mobile-nav-link w-full text-left flex items-center justify-between" :class="{ 'active': $page.component.startsWith('MasterData') }">
                 <div class="flex items-center">
                   <svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
                   Master Data
@@ -194,19 +194,19 @@
                 leave-to-class="transform opacity-0 scale-95"
               >
                 <div v-if="isMasterDataOpen" class="pl-4 space-y-1">
-                  <InertiaLink :href="route('master-data.document-types.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm">
+                  <InertiaLink :href="route('master-data.document-types.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm" :class="{ 'active': $page.component.startsWith('MasterData/DocumentTypes') }">
                     Document Types
                   </InertiaLink>
-                  <InertiaLink :href="route('master-data.users.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm">
+                  <InertiaLink :href="route('master-data.users.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm" :class="{ 'active': $page.component.startsWith('MasterData/Users') }">
                     Users & Roles
                   </InertiaLink>
-                  <InertiaLink :href="route('master-data.job-categories.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm">
+                  <InertiaLink :href="route('master-data.job-categories.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm" :class="{ 'active': $page.component.startsWith('MasterData/JobCategories') }">
                     Job Categories
                   </InertiaLink>
-                  <InertiaLink :href="route('master-data.skills.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm">
+                  <InertiaLink :href="route('master-data.skills.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm" :class="{ 'active': $page.component.startsWith('MasterData/Skills') }">
                     Skills
                   </InertiaLink>
-                  <InertiaLink :href="route('master-data.locations.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm">
+                  <InertiaLink :href="route('master-data.locations.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm" :class="{ 'active': $page.component.startsWith('MasterData/Locations') }">
                     Locations
                   </InertiaLink>
                 </div>
@@ -320,6 +320,11 @@ onMounted(() => {
     localStorage.setItem('darkMode', 'false');
   }
   document.addEventListener('click', closeUserMenu);
+
+  // Auto-expand Master Data menu if active
+  if (usePage().component.startsWith('MasterData')) {
+    isMasterDataOpen.value = true;
+  }
 });
 
 onUnmounted(() => {

@@ -162,18 +162,19 @@ const formatDate = (dateString) => {
             <!-- Header Card (Unchanged) -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card mb-6">
                 <div class="p-6">
-                    <div class="flex items-start justify-between">
-                        <div class="flex items-start space-x-6">
+                    <div class="flex flex-col md:flex-row items-center md:items-start justify-between gap-4">
+                        <div class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6 w-full">
                             <div class="flex-shrink-0">
-                                <div class="h-24 w-24 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 text-4xl font-bold">
+                                <img v-if="candidate.profile?.photo_url" :src="candidate.profile.photo_url" :alt="candidate.name" class="h-24 w-24 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-md">
+                                <div v-else class="h-24 w-24 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 text-4xl font-bold border-4 border-white dark:border-gray-700 shadow-md">
                                     {{ candidate.name.charAt(0).toUpperCase() }}
                                 </div>
                             </div>
-                            <div>
+                            <div class="text-center md:text-left">
                                 <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                                     {{ candidate.name }}
                                 </h1>
-                                <div class="space-y-2 text-gray-600 dark:text-gray-400">
+                                <div class="space-y-2 text-gray-600 dark:text-gray-400 flex flex-col items-center md:items-start">
                                     <div class="flex items-center">
                                         <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -189,8 +190,8 @@ const formatDate = (dateString) => {
                                 </div>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <span :class="getStatusColor(candidate.hiring_status)" class="px-3 py-1 text-sm font-semibold rounded-full">
+                        <div class="w-full md:w-auto flex justify-center md:justify-end">
+                            <span :class="getStatusColor(candidate.hiring_status)" class="px-3 py-1 text-sm font-semibold rounded-full whitespace-nowrap">
                                 {{ candidate.hiring_status.replace('_', ' ') }}
                             </span>
                         </div>
@@ -205,17 +206,17 @@ const formatDate = (dateString) => {
                     <!-- Update Status -->
                     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Update Hiring Status</h3>
-                        <div class="flex items-center space-x-4">
+                        <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3 md:space-x-4">
                             <select
                                 v-model="statusForm.hiring_status"
-                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm w-full md:w-auto"
                             >
                                 <option value="AVAILABLE">Available</option>
                                 <option value="READY_TO_HIRE">Ready to Hire</option>
                                 <option value="HIRED">Hired</option>
                                 <option value="NOT_AVAILABLE">Not Available</option>
                             </select>
-                            <PremiumButton @click="updateStatus" :disabled="statusForm.processing">
+                            <PremiumButton @click="updateStatus" :disabled="statusForm.processing" class="w-full md:w-auto justify-center">
                                 Update Status
                             </PremiumButton>
                         </div>

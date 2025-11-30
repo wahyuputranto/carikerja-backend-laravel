@@ -45,6 +45,21 @@ class TalentPoolController extends Controller
 
         $candidates = $query->latest()->paginate(15)->withQueryString();
 
+        // Generate temporary URLs for profile photos
+        $candidates->getCollection()->transform(function ($candidate) {
+            if ($candidate->profile && $candidate->profile->photo_url) {
+                try {
+                    $candidate->profile->photo_url = \Storage::disk('minio')->temporaryUrl(
+                        $candidate->profile->photo_url,
+                        now()->addMinutes(60)
+                    );
+                } catch (\Exception $e) {
+                    // Log error or keep original URL
+                }
+            }
+            return $candidate;
+        });
+
         // Get filter options
         $jobs = Job::select('id', 'title')->where('status', 'OPEN')->get();
         $statuses = [
@@ -75,6 +90,19 @@ class TalentPoolController extends Controller
             'applications.job.location.parent.parent',
             'applications.deployment', // Load deployment details
         ]);
+
+        if ($candidate->profile && $candidate->profile->photo_url) {
+            try {
+                // Generate temporary URL for the photo
+                $candidate->profile->photo_url = \Storage::disk('minio')->temporaryUrl(
+                    $candidate->profile->photo_url,
+                    now()->addMinutes(60)
+                );
+            } catch (\Exception $e) {
+                // Log error or keep original URL if generation fails
+                \Log::error('Failed to generate photo URL: ' . $e->getMessage());
+            }
+        }
 
         return Inertia::render('TalentPool/Show', [
             'candidate' => $candidate,
