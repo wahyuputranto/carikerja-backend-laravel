@@ -25,14 +25,31 @@ class JobSeeder extends Seeder
             return;
         }
 
-        $this->command->info('Seeding 100 jobs...');
+        $targetCategories = [
+            'customer-service',
+            'operations-logistics',
+            'hospitality-tourism'
+        ];
 
-        for ($i = 0; $i < 100; $i++) {
-            Job::factory()->create([
-                'client_profile_id' => $clientProfileIds->random(),
-                'job_category_id' => $jobCategoryIds->random(),
-                'location_id' => $locationIds->random(),
-            ]);
+        $this->command->info('Seeding jobs for specific categories...');
+
+        foreach ($targetCategories as $slug) {
+            $category = JobCategory::where('slug', $slug)->first();
+            
+            if (!$category) {
+                $this->command->warn("Category {$slug} not found.");
+                continue;
+            }
+
+            $this->command->info("Creating 5 jobs for {$category->name}...");
+
+            for ($i = 0; $i < 5; $i++) {
+                Job::factory()->create([
+                    'client_profile_id' => $clientProfileIds->random(),
+                    'job_category_id' => $category->id,
+                    'location_id' => $locationIds->random(),
+                ]);
+            }
         }
     }
 }

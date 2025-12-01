@@ -20,11 +20,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Define Gate for permissions
+        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+            return $user->hasPermission($ability) ? true : null;
+        });
+
         // Share all permission names for the authenticated user
         \Inertia\Inertia::share('auth.permissions', function () {
-            return auth()->user()
-                ? auth()->user()->getAllPermissions()->pluck('name')
-                : collect();
+            if (!auth()->user() || !auth()->user()->role) {
+                return [];
+            }
+            
+            if (auth()->user()->role->slug === 'superadmin') {
+                return ['*']; // Superadmin has all permissions
+            }
+
+            return auth()->user()->role->privileges->pluck('permission');
         });
 
         // Share the current user's role slug (or null if not logged in)

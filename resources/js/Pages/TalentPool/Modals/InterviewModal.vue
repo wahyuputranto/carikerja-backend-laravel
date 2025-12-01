@@ -10,7 +10,13 @@ import { watch, computed } from 'vue';
 
 const props = defineProps({
     show: Boolean,
-    application: Object, // Changed from applicationId to full object
+    application: Object,
+    candidate: Object,
+    interview: Object, // Added interview prop for editing
+    stage: {
+        type: String,
+        default: 'USER_INTERVIEW'
+    }
 });
 
 const emit = defineEmits(['close', 'submitted']);
@@ -21,34 +27,62 @@ const form = useForm({
     meeting_link: '',
     address: '',
     notes: '',
+    stage: props.stage,
 });
 
-// Watch for application changes to pre-fill data (Reschedule feature)
-watch(() => props.application, (newApp) => {
-    if (newApp) {
-        form.scheduled_at = newApp.interview_date || '';
-        // Determine type based on location content if not explicitly stored, 
-        // but ideally we should store type. For now, infer:
-        // If interview_location looks like URL -> ONLINE, else OFFLINE
-        if (newApp.interview_location && newApp.interview_location.startsWith('http')) {
+// Watch for changes to pre-fill data
+watch(() => [props.application, props.interview], () => {
+    if (props.interview) {
+        // Editing existing interview
+        form.scheduled_at = props.interview.scheduled_at || '';
+        form.type = props.interview.type || 'ONLINE';
+        form.meeting_link = props.interview.meeting_link || '';
+        form.address = props.interview.location_address || '';
+        form.notes = props.interview.feedback_notes || '';
+        form.stage = props.interview.stage;
+    } else if (props.application) {
+        // Scheduling from Application context (Reschedule or New)
+        form.scheduled_at = props.application.interview_date || '';
+        if (props.application.interview_location && props.application.interview_location.startsWith('http')) {
             form.type = 'ONLINE';
-            form.meeting_link = newApp.interview_location;
+            form.meeting_link = props.application.interview_location;
             form.address = '';
-        } else if (newApp.interview_address) {
+        } else if (props.application.interview_address) {
             form.type = 'OFFLINE';
-            form.address = newApp.interview_address;
+            form.address = props.application.interview_address;
             form.meeting_link = '';
         } else {
-             // Default
              form.type = 'ONLINE';
         }
-        
-        form.notes = newApp.interview_notes || '';
+        form.notes = props.application.interview_notes || '';
+        form.stage = props.stage;
     }
 }, { immediate: true });
 
+// Ensure stage is updated if it changes dynamically
+watch(() => props.stage, (newStage) => {
+    form.stage = newStage;
+}, { immediate: true });
+
 const submit = () => {
-    form.post(route('interviews.store', props.application.id), {
+    let url;
+    let method = 'post';
+    let data = { ...form };
+
+    if (props.interview && props.interview.id) {
+        url = route('interviews.update', props.interview.id);
+        method = 'put';
+    } else if (props.application && props.application.id) {
+        url = route('interviews.store', props.application.id);
+    } else if (props.candidate && props.candidate.id) {
+        url = route('interviews.store-candidate', props.candidate.id);
+        data.candidate_id = props.candidate.id;
+    }
+
+    form.transform((data) => ({
+        ...data,
+        candidate_id: props.candidate?.id
+    })).submit(method, url, {
         onSuccess: () => {
             form.reset();
             emit('submitted');

@@ -14,7 +14,7 @@ const props = defineProps({
 });
 
 const page = usePage();
-const isSuperAdmin = computed(() => page.props.auth.role === 'superadmin');
+const isSuperAdmin = computed(() => ['superadmin', 'recruiter'].includes(page.props.auth.role));
 const isClient = computed(() => page.props.auth.role === 'client');
 
 const formatCurrency = (value) => {

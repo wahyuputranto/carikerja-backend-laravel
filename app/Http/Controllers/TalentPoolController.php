@@ -82,7 +82,13 @@ class TalentPoolController extends Controller
     public function show(Candidate $candidate)
     {
         $candidate->load([
-            'profile',
+            'profile.interestedJobCategory',
+            'personalDetail',
+            'passports',
+            'emergencyContacts',
+            'nonFormalEducations',
+            'languages',
+            'interviews', // Load candidate level interviews
             'educations',
             'experiences',
             'documents.documentType',

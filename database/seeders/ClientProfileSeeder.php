@@ -23,8 +23,8 @@ class ClientProfileSeeder extends Seeder
             return;
         }
 
-        // Create 15 clients
-        User::factory()->count(15)->create(['role_id' => $clientRole->id])->each(function ($user) {
+        // Create 1 client
+        User::factory()->count(1)->create(['role_id' => $clientRole->id])->each(function ($user) {
             ClientProfile::factory()->create(['user_id' => $user->id]);
         });
     }

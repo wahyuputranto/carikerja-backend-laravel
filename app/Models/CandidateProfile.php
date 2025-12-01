@@ -27,6 +27,7 @@ class CandidateProfile extends Model
         'about_me',
         'photo_url',
         'cv_url',
+        'interested_job_category_id',
     ];
 
     protected $casts = [
@@ -47,5 +48,10 @@ class CandidateProfile extends Model
     public function candidate()
     {
         return $this->belongsTo(Candidate::class);
+    }
+
+    public function interestedJobCategory()
+    {
+        return $this->belongsTo(JobCategory::class, 'interested_job_category_id');
     }
 }

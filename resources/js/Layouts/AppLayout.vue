@@ -41,13 +41,13 @@
                 <svg class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 Talent Pool
             </InertiaLink>
-            <InertiaLink v-if="$page.props.auth.role === 'superadmin'" :href="route('clients.index')" class="nav-link" :class="{ 'active': $page.component.startsWith('Clients') }">
+            <InertiaLink v-if="hasPermission('menu.clients')" :href="route('clients.index')" class="nav-link" :class="{ 'active': $page.component.startsWith('Clients') }">
                 <svg class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m-1 4h1m-1 4h1M3 21h18"/></svg>
                 Clients
             </InertiaLink>
             
             <!-- Master Data Dropdown (Superadmin only) -->
-            <div v-if="$page.props.auth.role === 'superadmin'" class="relative">
+            <div v-if="hasPermission('menu.master_data')" class="relative">
                 <Dropdown align="right" width="48">
                     <template #trigger>
                         <button class="nav-link inline-flex items-center cursor-pointer" :class="{ 'active': $page.component.startsWith('MasterData') }">
@@ -62,7 +62,10 @@
                             Document Types
                         </DropdownLink>
                         <DropdownLink :href="route('master-data.users.index')">
-                            Users & Roles
+                            Users
+                        </DropdownLink>
+                        <DropdownLink :href="route('master-data.roles.index')">
+                            Roles
                         </DropdownLink>
                         <DropdownLink :href="route('master-data.job-categories.index')">
                             Job Categories
@@ -168,13 +171,13 @@
               <svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
               Talent Pool
             </InertiaLink>
-            <InertiaLink v-if="$page.props.auth.role === 'superadmin'" :href="route('clients.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link" :class="{ 'active': $page.component.startsWith('Clients') }">
+            <InertiaLink v-if="hasPermission('menu.clients')" :href="route('clients.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link" :class="{ 'active': $page.component.startsWith('Clients') }">
               <svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
               Clients
             </InertiaLink>
 
             <!-- Master Data Dropdown in Mobile -->
-            <div v-if="$page.props.auth.role === 'superadmin'" class="space-y-1">
+            <div v-if="hasPermission('menu.master_data')" class="space-y-1">
               <button @click="isMasterDataOpen = !isMasterDataOpen" class="mobile-nav-link w-full text-left flex items-center justify-between" :class="{ 'active': $page.component.startsWith('MasterData') }">
                 <div class="flex items-center">
                   <svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
@@ -198,7 +201,10 @@
                     Document Types
                   </InertiaLink>
                   <InertiaLink :href="route('master-data.users.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm" :class="{ 'active': $page.component.startsWith('MasterData/Users') }">
-                    Users & Roles
+                    Users
+                  </InertiaLink>
+                  <InertiaLink :href="route('master-data.roles.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm" :class="{ 'active': $page.component.startsWith('MasterData/Roles') }">
+                    Roles
                   </InertiaLink>
                   <InertiaLink :href="route('master-data.job-categories.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm" :class="{ 'active': $page.component.startsWith('MasterData/JobCategories') }">
                     Job Categories
@@ -335,6 +341,15 @@ onUnmounted(() => {
 // Logout helper – uses Inertia post
 const logout = () => {
   router.post(route('logout'));
+};
+
+const hasPermission = (permission) => {
+    const user = usePage().props.auth.user;
+    if (user?.role?.slug === 'superadmin') return true;
+
+    const permissions = usePage().props.auth.permissions || [];
+    if (permissions.includes('*')) return true;
+    return permissions.includes(permission);
 };
 </script>
 

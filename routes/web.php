@@ -26,6 +26,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Users
         Route::resource('users', \App\Http\Controllers\UserController::class)->except(['create', 'edit', 'show']);
 
+        // Roles
+        Route::resource('roles', \App\Http\Controllers\RoleController::class)->except(['create', 'edit', 'show']);
+
         // Job Categories
         Route::resource('job-categories', \App\Http\Controllers\MasterData\JobCategoryController::class)->except(['create', 'edit', 'show']);
 
@@ -65,9 +68,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/{application}/status', [\App\Http\Controllers\ApplicationController::class, 'updateStatus'])->name('update-status');
     });
 
-    // Interview Routes
+    // Interview Routes (Application Level)
     Route::post('/interviews/{application}', [\App\Http\Controllers\InterviewController::class, 'store'])->name('interviews.store');
     Route::post('/interviews/{application}/feedback', [\App\Http\Controllers\InterviewController::class, 'storeFeedback'])->name('interviews.feedback');
+    Route::post('/interviews/{application}/pre-interview-result', [\App\Http\Controllers\InterviewController::class, 'storePreInterviewResult'])->name('interviews.pre-interview-result');
+
+    // Interview Routes (Candidate Level)
+    Route::post('/candidates/{candidate}/interviews', [\App\Http\Controllers\InterviewController::class, 'store'])->name('interviews.store-candidate');
+    Route::post('/candidates/{candidate}/pre-interview-result', [\App\Http\Controllers\InterviewController::class, 'storePreInterviewResult'])->name('interviews.pre-interview-result-candidate');
+    
+    // General Interview Routes
+    Route::put('/interviews/{interview}', [\App\Http\Controllers\InterviewController::class, 'update'])->name('interviews.update');
 
     // Deployment Routes
     Route::post('/deployments/{application}/{stage}', [\App\Http\Controllers\DeploymentController::class, 'store'])->name('deployments.store');

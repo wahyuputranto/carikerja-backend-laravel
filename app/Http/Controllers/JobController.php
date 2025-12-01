@@ -33,6 +33,10 @@ class JobController extends Controller
             $query->where('location_id', $request->location_id);
         }
 
+        if ($request->filled('job_category_id')) {
+            $query->where('job_category_id', $request->job_category_id);
+        }
+
         // If user is a client, only show their jobs
         if (auth()->user()->hasRole('client')) {
             $query->where('client_profile_id', auth()->user()->clientProfile->id);
@@ -40,11 +44,13 @@ class JobController extends Controller
         
         $jobs = $query->latest()->paginate(15)->withQueryString();
         $locations = Location::where('type', 'CITY')->orderBy('name')->get(['id', 'name']);
+        $categories = JobCategory::orderBy('name')->get(['id', 'name']);
 
         return Inertia::render('Jobs/Index', [
             'jobs' => $jobs,
-            'filters' => $request->only(['search', 'status', 'location_id']),
+            'filters' => $request->only(['search', 'status', 'location_id', 'job_category_id']),
             'locations' => $locations,
+            'categories' => $categories,
         ]);
     }
 

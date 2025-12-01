@@ -17,9 +17,11 @@ class DatabaseSeeder extends Seeder
         
         $this->call([
             RoleSeeder::class,
+            RolePrivilegeSeeder::class, // Add privileges and Recruiter role
             MasterDataSeeder::class,
             MasterDocumentTypeSeeder::class,
             SuperadminSeeder::class,
+            RecruiterSeeder::class, // Create Recruiter user
             ClientProfileSeeder::class,
             CandidateSeeder::class,
             JobSeeder::class,

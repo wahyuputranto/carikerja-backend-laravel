@@ -96,4 +96,21 @@ class User extends Authenticatable
     {
         return $this->role && $this->role->slug === $slug;
     }
+
+    /**
+     * Check if the user has a specific permission.
+     */
+    public function hasPermission(string $permission): bool
+    {
+        if (!$this->role) {
+            return false;
+        }
+
+        // Superadmin has all permissions
+        if ($this->role->slug === 'superadmin') {
+            return true;
+        }
+
+        return $this->role->privileges()->where('permission', $permission)->exists();
+    }
 }

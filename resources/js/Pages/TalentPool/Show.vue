@@ -5,7 +5,8 @@ import PremiumButton from '@/Components/PremiumButton.vue';
 import InterviewModal from './Modals/InterviewModal.vue';
 import DeploymentModal from './Modals/DeploymentModal.vue';
 import DocumentRejectModal from './Modals/DocumentRejectModal.vue';
-import FeedbackModal from './Modals/FeedbackModal.vue'; // Import FeedbackModal
+import FeedbackModal from './Modals/FeedbackModal.vue';
+import PreInterviewResultModal from './Modals/PreInterviewResultModal.vue'; // Import PreInterviewResultModal
 import { ref } from 'vue';
 
 defineOptions({
@@ -37,9 +38,12 @@ const getStatusColor = (status) => {
 // Application Status Logic
 const showInterviewModal = ref(false);
 const showDeploymentModal = ref(false);
-const showFeedbackModal = ref(false); // New State
-const selectedApplication = ref(null); // Changed to Object
+const showFeedbackModal = ref(false);
+const showPreInterviewResultModal = ref(false); // New State
+const selectedApplication = ref(null);
+const selectedInterview = ref(null); // New State
 const deploymentStage = ref('');
+const interviewStage = ref('USER_INTERVIEW'); // Default stage
 
 const getAvailableStatuses = (app) => {
     const allStatuses = [
@@ -65,7 +69,10 @@ const handleApplicationStatusChange = (application, event) => {
     selectedApplication.value = application;
 
     // Logic changed: Don't auto-open Interview Modal
-    if (newStatus === 'OFFERING') {
+    if (newStatus === 'INTERVIEW') {
+        interviewStage.value = 'USER_INTERVIEW';
+        showInterviewModal.value = true;
+    } else if (newStatus === 'OFFERING') {
         deploymentStage.value = 'CONTRACT';
         showDeploymentModal.value = true;
     } else if (newStatus === 'PROCESSING_VISA') {
@@ -121,7 +128,9 @@ const onModalClose = () => {
     showInterviewModal.value = false;
     showDeploymentModal.value = false;
     showFeedbackModal.value = false;
+    showPreInterviewResultModal.value = false;
     selectedApplication.value = null;
+    selectedInterview.value = null;
     router.reload();
 };
 
@@ -224,6 +233,178 @@ const formatDate = (dateString) => {
                 </div>
             </div>
 
+            <!-- Candidate Screening / Pre-Interview Section -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card mb-6">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
+                            <svg class="h-6 w-6 mr-2 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                            </svg>
+                            Candidate Screening (Pre-Interview)
+                        </h2>
+                        <button 
+                            @click="selectedApplication = null; selectedInterview = null; interviewStage = 'PRE_INTERVIEW'; showInterviewModal = true"
+                            class="text-sm bg-purple-50 text-purple-700 hover:bg-purple-100 px-3 py-1.5 rounded-md font-medium transition-colors"
+                        >
+                            Schedule Pre-Interview
+                        </button>
+                    </div>
+
+                    <!-- List of Pre-Interviews -->
+                    <div v-if="candidate.interviews && candidate.interviews.filter(i => i.stage === 'PRE_INTERVIEW').length > 0" class="space-y-4">
+                        <div v-for="interview in candidate.interviews.filter(i => i.stage === 'PRE_INTERVIEW')" :key="interview.id" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/30">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="font-bold text-gray-900 dark:text-gray-100">{{ formatDate(interview.scheduled_at) }}</span>
+                                        <span :class="{
+                                            'bg-green-100 text-green-800': interview.result === 'PASSED',
+                                            'bg-red-100 text-red-800': interview.result === 'FAILED',
+                                            'bg-yellow-100 text-yellow-800': !interview.result
+                                        }" class="text-xs px-2 py-0.5 rounded-full font-semibold uppercase">
+                                            {{ interview.result || 'Scheduled' }}
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        Type: {{ interview.type }} 
+                                        <span v-if="interview.type === 'ONLINE' && interview.meeting_link">
+                                            - <a :href="interview.meeting_link" target="_blank" class="text-indigo-600 hover:underline">Join Meeting</a>
+                                        </span>
+                                        <span v-if="interview.type === 'OFFLINE' && interview.location_address">
+                                            - {{ interview.location_address }}
+                                        </span>
+                                    </p>
+                                    <p v-if="interview.feedback_notes" class="text-sm text-gray-600 dark:text-gray-400 mt-2 italic">
+                                        "{{ interview.feedback_notes }}"
+                                    </p>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <button 
+                                        v-if="!interview.result"
+                                        @click="selectedInterview = interview; selectedApplication = null; showInterviewModal = true"
+                                        class="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded shadow-sm transition-colors"
+                                    >
+                                        Reschedule
+                                    </button>
+                                    <button 
+                                        v-if="!interview.result"
+                                        @click="selectedApplication = null; showPreInterviewResultModal = true"
+                                        class="text-xs bg-green-600 text-white hover:bg-green-700 px-3 py-1.5 rounded shadow-sm transition-colors"
+                                    >
+                                        Input Result
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p v-else class="text-gray-500 dark:text-gray-400 italic text-sm">No pre-interviews scheduled or recorded.</p>
+                </div>
+            </div>
+
+            <!-- Personal Details & Passport -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card mb-6">
+                <div class="p-6">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                        <svg class="h-6 w-6 mr-2 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        Personal Details
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Basic Info -->
+                        <div class="space-y-3">
+                            <h3 class="font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2">Basic Information</h3>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <span class="text-gray-500 dark:text-gray-400">NIK:</span>
+                                <span class="text-gray-900 dark:text-gray-200 font-medium">{{ candidate.profile?.nik || '-' }}</span>
+                                
+                                <span class="text-gray-500 dark:text-gray-400">Birth Place/Date:</span>
+                                <span class="text-gray-900 dark:text-gray-200 font-medium">
+                                    {{ candidate.profile?.birth_place }}, {{ formatDate(candidate.profile?.birth_date) }}
+                                </span>
+
+                                <span class="text-gray-500 dark:text-gray-400">Gender:</span>
+                                <span class="text-gray-900 dark:text-gray-200 font-medium">{{ candidate.profile?.gender === 'M' ? 'Male' : 'Female' }}</span>
+
+                                <span class="text-gray-500 dark:text-gray-400">Marital Status:</span>
+                                <span class="text-gray-900 dark:text-gray-200 font-medium">{{ candidate.personal_detail?.marital_status || '-' }}</span>
+
+                                <span class="text-gray-500 dark:text-gray-400">Religion:</span>
+                                <span class="text-gray-900 dark:text-gray-200 font-medium">{{ candidate.personal_detail?.religion || '-' }}</span>
+
+                                <span class="text-gray-500 dark:text-gray-400">Citizenship:</span>
+                                <span class="text-gray-900 dark:text-gray-200 font-medium">{{ candidate.personal_detail?.citizenship || 'IDN' }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Physical & Family -->
+                        <div class="space-y-3">
+                            <h3 class="font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2">Physical & Family</h3>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <span class="text-gray-500 dark:text-gray-400">Height/Weight:</span>
+                                <span class="text-gray-900 dark:text-gray-200 font-medium">
+                                    {{ candidate.personal_detail?.height ? candidate.personal_detail.height + ' cm' : '-' }} / 
+                                    {{ candidate.personal_detail?.weight ? candidate.personal_detail.weight + ' kg' : '-' }}
+                                </span>
+
+                                <span class="text-gray-500 dark:text-gray-400">Father's Name:</span>
+                                <span class="text-gray-900 dark:text-gray-200 font-medium">{{ candidate.personal_detail?.fathers_name || '-' }}</span>
+
+                                <span class="text-gray-500 dark:text-gray-400">Mother's Name:</span>
+                                <span class="text-gray-900 dark:text-gray-200 font-medium">{{ candidate.personal_detail?.mothers_name || '-' }}</span>
+                                
+                                <span class="text-gray-500 dark:text-gray-400">Interested Job:</span>
+                                <span class="text-gray-900 dark:text-gray-200 font-medium">{{ candidate.profile?.interested_job_category?.name || '-' }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Emergency Contact -->
+                        <div class="space-y-3">
+                            <h3 class="font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2">Emergency Contact</h3>
+                            <div v-if="candidate.emergency_contacts && candidate.emergency_contacts.length > 0" class="text-sm space-y-2">
+                                <div v-for="contact in candidate.emergency_contacts" :key="contact.id">
+                                    <p class="font-medium text-gray-900 dark:text-gray-200">{{ contact.name }} ({{ contact.relation }})</p>
+                                    <p class="text-gray-600 dark:text-gray-400">{{ contact.contact_number }}</p>
+                                    <p class="text-gray-500 dark:text-gray-500 text-xs">{{ contact.address }}</p>
+                                </div>
+                            </div>
+                            <p v-else class="text-gray-500 dark:text-gray-400 italic text-sm">No emergency contacts.</p>
+                        </div>
+                    </div>
+
+                    <!-- Passport Details -->
+                    <div v-if="candidate.passports && candidate.passports.length > 0" class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div v-for="(passport, index) in candidate.passports" :key="passport.id" class="space-y-3">
+                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2">
+                                    Passport Information {{ candidate.passports.length > 1 ? `#${index + 1}` : '' }}
+                                </h3>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <span class="text-gray-500 dark:text-gray-400">Number:</span>
+                                    <span class="text-gray-900 dark:text-gray-200 font-medium">{{ passport.passport_number }}</span>
+                                    
+                                    <span class="text-gray-500 dark:text-gray-400">Issued By:</span>
+                                    <span class="text-gray-900 dark:text-gray-200 font-medium">{{ passport.issued_by }}</span>
+                                    
+                                    <span class="text-gray-500 dark:text-gray-400">Valid:</span>
+                                    <span class="text-gray-900 dark:text-gray-200 font-medium">
+                                        {{ new Date(passport.issue_date).toLocaleDateString('en-GB') }} - {{ new Date(passport.expiry_date).toLocaleDateString('en-GB') }}
+                                    </span>
+
+                                    <div v-if="passport.file_path" class="col-span-2 mt-1">
+                                         <button @click="viewDocument({ file_path: passport.file_path })" class="text-xs text-primary-600 hover:text-primary-800 font-medium flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                            View Scanned Passport
+                                         </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Education (Unchanged) -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card">
@@ -270,6 +451,64 @@ const formatDate = (dateString) => {
                         <p v-else class="text-gray-500 dark:text-gray-400 italic">No work experience records available.</p>
                     </div>
                 </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <!-- Languages & Skills -->
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card">
+                    <div class="p-6">
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                            <svg class="h-6 w-6 mr-2 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                            </svg>
+                            Languages & Skills
+                        </h2>
+                        
+                        <!-- Languages -->
+                        <div class="mb-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2 text-sm uppercase tracking-wider">Languages</h3>
+                            <div v-if="candidate.languages && candidate.languages.length > 0" class="space-y-2">
+                                <div v-for="lang in candidate.languages" :key="lang.id" class="flex justify-between items-center bg-gray-50 dark:bg-gray-700/30 p-2 rounded">
+                                    <span class="font-medium text-gray-900 dark:text-gray-200">{{ lang.language }}</span>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 text-right">
+                                        <div>S: {{ lang.speaking }} | R: {{ lang.reading }}</div>
+                                        <div>W: {{ lang.writing }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p v-else class="text-gray-500 dark:text-gray-400 italic text-sm">No languages listed.</p>
+                        </div>
+
+                        <!-- Computer Skills -->
+                        <div v-if="candidate.personal_detail?.computer_skills">
+                            <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2 text-sm uppercase tracking-wider">Computer Skills</h3>
+                            <p class="text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/30 p-3 rounded text-sm">
+                                {{ candidate.personal_detail.computer_skills }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Non-Formal Education -->
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card">
+                    <div class="p-6">
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                            <svg class="h-6 w-6 mr-2 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                            </svg>
+                            Non-Formal Education
+                        </h2>
+                        <div v-if="candidate.non_formal_educations && candidate.non_formal_educations.length > 0" class="space-y-4">
+                            <div v-for="edu in candidate.non_formal_educations" :key="edu.id" class="border-l-4 border-green-500 pl-4 py-2">
+                                <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ edu.name }}</h3>
+                                <p class="text-gray-600 dark:text-gray-400">{{ edu.subject }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-500">{{ edu.year }} • {{ edu.country }}</p>
+                            </div>
+                        </div>
+                        <p v-else class="text-gray-500 dark:text-gray-400 italic">No non-formal education records.</p>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Documents (Unchanged) -->
@@ -353,8 +592,8 @@ const formatDate = (dateString) => {
                                     <div class="flex items-center border-l border-gray-200 dark:border-gray-600 pl-3 gap-2">
                                         <!-- Schedule Interview -->
                                         <button 
-                                            v-if="app.status === 'INTERVIEW'"
-                                            @click="selectedApplication = app; showInterviewModal = true"
+                                            v-if="['INTERVIEW'].includes(app.status)"
+                                            @click="selectedApplication = app; interviewStage = 'USER_INTERVIEW'; showInterviewModal = true"
                                             class="p-2 rounded-full hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-400 transition-all"
                                             :title="app.interview_date ? 'Reschedule Interview' : 'Schedule Interview'"
                                         >
@@ -375,6 +614,8 @@ const formatDate = (dateString) => {
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
                                             </svg>
                                         </button>
+
+
 
                                         <!-- Feedback -->
                                         <button 
@@ -581,6 +822,17 @@ const formatDate = (dateString) => {
         <InterviewModal 
             :show="showInterviewModal" 
             :application="selectedApplication"
+            :candidate="candidate"
+            :interview="selectedInterview"
+            :stage="interviewStage"
+            @close="onModalClose"
+            @submitted="onModalClose"
+        />
+
+        <PreInterviewResultModal
+            :show="showPreInterviewResultModal"
+            :application="selectedApplication"
+            :candidate="candidate"
             @close="onModalClose"
             @submitted="onModalClose"
         />

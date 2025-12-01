@@ -9,7 +9,18 @@ class Interview extends Model
 {
     use HasUuids;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'application_id',
+        'candidate_id', // Added
+        'interviewer_id',
+        'stage',
+        'scheduled_at',
+        'type',
+        'meeting_link',
+        'result',
+        'feedback_notes',
+        'location_address',
+    ];
 
     protected $casts = [
         'scheduled_at' => 'datetime',
@@ -17,7 +28,12 @@ class Interview extends Model
 
     public function application()
     {
-        return $this->belongsTo(Application::class);
+        return $this->belongsTo(Application::class, 'application_id');
+    }
+
+    public function candidate()
+    {
+        return $this->belongsTo(Candidate::class, 'candidate_id');
     }
 
     public function interviewer()

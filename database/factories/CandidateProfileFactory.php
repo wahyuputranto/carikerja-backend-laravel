@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CandidateProfile>
  */
+use App\Models\JobCategory;
+
+// ...
+
 class CandidateProfileFactory extends Factory
 {
     /**
@@ -18,6 +22,7 @@ class CandidateProfileFactory extends Factory
     {
         return [
             'about_me' => $this->faker->realText(500),
+            'interested_job_category_id' => JobCategory::inRandomOrder()->first()?->id,
         ];
     }
 }

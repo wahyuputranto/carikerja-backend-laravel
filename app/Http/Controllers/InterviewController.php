@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class InterviewController extends Controller
 {
-    public function store(Request $request, Application $application)
+    public function store(Request $request, Application $application = null)
     {
         $validated = $request->validate([
             'scheduled_at' => 'nullable|date',
@@ -17,36 +17,47 @@ class InterviewController extends Controller
             'meeting_link' => 'required_if:type,ONLINE|nullable|url',
             'address' => 'required_if:type,OFFLINE|nullable|string',
             'notes' => 'nullable|string',
+            'stage' => 'nullable|in:PRE_INTERVIEW,USER_INTERVIEW',
+            'candidate_id' => 'nullable|exists:candidates,id',
         ]);
 
-        // Create Interview (Keep existing logic for history/record)
+        $stage = $validated['stage'] ?? 'USER_INTERVIEW';
+
+        // Create Interview
         if ($validated['scheduled_at']) {
             Interview::create([
-                'application_id' => $application->id,
+                'application_id' => $application ? $application->id : null,
+                'candidate_id' => $application ? $application->candidate_id : ($validated['candidate_id'] ?? null),
                 'interviewer_id' => Auth::id(),
                 'scheduled_at' => $validated['scheduled_at'],
                 'type' => $validated['type'],
                 'meeting_link' => $validated['meeting_link'],
-                'location_address' => $validated['address'] ?? null, // Assuming Interview model has this or we ignore it there
+                'location_address' => $validated['address'] ?? null,
                 'feedback_notes' => $validated['notes'],
+                'stage' => $stage,
             ]);
         }
 
-        // Determine Step
-        $step = 3; // Default Scheduling
-        if (!empty($validated['scheduled_at'])) {
-            $step = 4; // Interview Scheduled
-        }
+        // If Application exists, update its status (User Interview flow)
+        if ($application) {
+            // Determine Step & Status
+            $status = $application->status;
+            $step = $application->current_step;
 
-        // Update Application Status & Sync Details
-        $application->update([
-            'status' => 'INTERVIEW',
-            'current_step' => $step,
-            'interview_date' => $validated['scheduled_at'],
-            'interview_location' => $validated['type'] === 'ONLINE' ? $validated['meeting_link'] : 'Offline', // For frontend display compatibility
-            'interview_address' => $validated['address'] ?? null,
-            'interview_notes' => $validated['notes'],
-        ]);
+            if ($stage === 'USER_INTERVIEW') {
+                $status = 'INTERVIEW';
+                $step = !empty($validated['scheduled_at']) ? 4 : 3;
+            }
+
+            $application->update([
+                'status' => $status,
+                'current_step' => $step,
+                'interview_date' => $validated['scheduled_at'],
+                'interview_location' => $validated['type'] === 'ONLINE' ? $validated['meeting_link'] : 'Offline',
+                'interview_address' => $validated['address'] ?? null,
+                'interview_notes' => $validated['notes'],
+            ]);
+        }
 
         return back()->with('success', 'Interview scheduled successfully.');
     }
@@ -81,5 +92,87 @@ class InterviewController extends Controller
         $application->update($updateData);
 
         return back()->with('success', 'Interview feedback saved successfully.');
+    }
+
+    public function storePreInterviewResult(Request $request, Application $application = null)
+    {
+        $validated = $request->validate([
+            'languages' => 'array',
+            'languages.*.language' => 'required|string',
+            'languages.*.speaking' => 'nullable|string',
+            'languages.*.reading' => 'nullable|string',
+            'languages.*.writing' => 'nullable|string',
+            'computer_skills' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'result' => 'required|in:PASSED,FAILED',
+            'candidate_id' => 'required_without:application|exists:candidates,id',
+        ]);
+
+        $candidateId = $application ? $application->candidate_id : $validated['candidate_id'];
+        $candidate = \App\Models\Candidate::findOrFail($candidateId);
+
+        // 1. Update Candidate Languages
+        $candidate->languages()->delete(); // Replace existing
+        foreach ($validated['languages'] as $lang) {
+            $candidate->languages()->create($lang);
+        }
+
+        // 2. Update Computer Skills
+        $candidate->personalDetail()->updateOrCreate(
+            ['candidate_id' => $candidate->id],
+            ['computer_skills' => $validated['computer_skills']]
+        );
+
+        // 3. Update Interview Record (Find the latest PRE_INTERVIEW for this candidate)
+        $interview = Interview::where('candidate_id', $candidate->id)
+            ->where('stage', 'PRE_INTERVIEW')
+            ->latest()
+            ->first();
+
+        if ($interview) {
+            $interview->update([
+                'result' => $validated['result'],
+                'feedback_notes' => $validated['notes'],
+            ]);
+        } else {
+            // If no scheduled interview found, create a record of the result
+            Interview::create([
+                'application_id' => $application ? $application->id : null,
+                'candidate_id' => $candidate->id,
+                'interviewer_id' => Auth::id(),
+                'stage' => 'PRE_INTERVIEW',
+                'scheduled_at' => now(), // Assume done now
+                'type' => 'OFFLINE', // Default
+                'result' => $validated['result'],
+                'feedback_notes' => $validated['notes'],
+            ]);
+        }
+
+        // 4. Update Candidate Status if needed?
+        // Maybe mark candidate as "Screened" or "Verified"?
+        // For now, just saving the result is enough as per request.
+
+        return back()->with('success', 'Pre-Interview result saved successfully.');
+    }
+
+    public function update(Request $request, Interview $interview)
+    {
+        $validated = $request->validate([
+            'scheduled_at' => 'required|date',
+            'type' => 'required|in:ONLINE,OFFLINE',
+            'meeting_link' => 'required_if:type,ONLINE|nullable|url',
+            'address' => 'required_if:type,OFFLINE|nullable|string',
+            'notes' => 'nullable|string',
+        ]);
+
+        $interview->update([
+            'scheduled_at' => $validated['scheduled_at'],
+            'type' => $validated['type'],
+            'meeting_link' => $validated['meeting_link'],
+            'location_address' => $validated['address'] ?? null,
+            'feedback_notes' => $validated['notes'],
+        ]);
+
+        return back()->with('success', 'Interview rescheduled successfully.');
     }
 }

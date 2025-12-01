@@ -18,7 +18,7 @@ class DashboardController extends Controller
         $recentJobs = [];
         $recentCandidates = [];
 
-        if ($user->hasRole('superadmin')) {
+        if ($user->hasRole('superadmin') || $user->hasRole('recruiter')) {
             // Superadmin Stats
             $stats = [
                 'total_jobs' => Job::count(),

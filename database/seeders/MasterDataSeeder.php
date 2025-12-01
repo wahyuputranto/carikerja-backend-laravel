@@ -13,21 +13,11 @@ class MasterDataSeeder extends Seeder
         Schema::disableForeignKeyConstraints();
 
         // Job Categories
+        // Job Categories
         $categories = [
-            ['name' => 'IT & Software', 'slug' => 'it-software'],
-            ['name' => 'Marketing & Sales', 'slug' => 'marketing-sales'],
-            ['name' => 'Finance & Accounting', 'slug' => 'finance-accounting'],
-            ['name' => 'Human Resources', 'slug' => 'human-resources'],
             ['name' => 'Customer Service', 'slug' => 'customer-service'],
             ['name' => 'Operations & Logistics', 'slug' => 'operations-logistics'],
-            ['name' => 'Design & Creative', 'slug' => 'design-creative'],
-            ['name' => 'Engineering', 'slug' => 'engineering'],
-            ['name' => 'Healthcare', 'slug' => 'healthcare'],
-            ['name' => 'Education', 'slug' => 'education'],
             ['name' => 'Hospitality & Tourism', 'slug' => 'hospitality-tourism'],
-            ['name' => 'Agriculture & Plantation', 'slug' => 'agriculture-plantation'],
-            ['name' => 'Manufacturing', 'slug' => 'manufacturing'],
-            ['name' => 'Construction', 'slug' => 'construction'],
         ];
 
         DB::table('master_job_categories')->truncate();

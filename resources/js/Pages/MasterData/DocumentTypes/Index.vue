@@ -19,17 +19,30 @@ const props = defineProps({
     documentTypes: Array,
 });
 
+const availableMimeTypes = [
+    { label: 'PDF', value: 'application/pdf' },
+    { label: 'Excel (XLSX)', value: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
+    { label: 'Excel (XLS)', value: 'application/vnd.ms-excel' },
+    { label: 'Word (DOCX)', value: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
+    { label: 'Word (DOC)', value: 'application/msword' },
+    { label: 'Image (JPEG)', value: 'image/jpeg' },
+    { label: 'Image (PNG)', value: 'image/png' },
+    { label: 'Video (MP4)', value: 'video/mp4' },
+];
+
 const showModal = ref(false);
 const editingItem = ref(null);
 const form = useForm({
     name: '',
     is_mandatory: false,
     chunkable: false,
+    allowed_mimetypes: [],
 });
 
 const openCreateModal = () => {
     editingItem.value = null;
     form.reset();
+    form.allowed_mimetypes = [];
     showModal.value = true;
 };
 
@@ -38,6 +51,7 @@ const openEditModal = (item) => {
     form.name = item.name;
     form.is_mandatory = !!item.is_mandatory;
     form.chunkable = !!item.chunkable;
+    form.allowed_mimetypes = Array.isArray(item.allowed_mimetypes) ? item.allowed_mimetypes : [];
     showModal.value = true;
 };
 
@@ -198,6 +212,19 @@ const deleteItem = (item) => {
                             <Checkbox v-model:checked="form.chunkable" />
                             <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Chunkable (Large Files)</span>
                         </label>
+                    </div>
+
+                    <div>
+                        <InputLabel value="Allowed File Types" class="mb-2" />
+                        <div class="grid grid-cols-2 gap-2">
+                            <label v-for="type in availableMimeTypes" :key="type.value" class="flex items-center">
+                                <Checkbox :checked="form.allowed_mimetypes.includes(type.value)" @update:checked="(checked) => {
+                                    if (checked) form.allowed_mimetypes.push(type.value);
+                                    else form.allowed_mimetypes = form.allowed_mimetypes.filter(t => t !== type.value);
+                                }" />
+                                <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">{{ type.label }}</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 

@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
-class Role extends Model
+class RolePrivilege extends Model
 {
-    protected $table = 'roles';
+    protected $table = 'role_privileges';
     protected $guarded = [];
     protected $keyType = 'string';
     public $incrementing = false;
@@ -18,18 +19,13 @@ class Role extends Model
         
         static::creating(function ($model) {
             if (empty($model->id)) {
-                $model->id = (string) \Illuminate\Support\Str::uuid();
+                $model->id = (string) Str::uuid();
             }
         });
     }
 
-    public function users(): HasMany
+    public function role(): BelongsTo
     {
-        return $this->hasMany(User::class);
-    }
-
-    public function privileges(): HasMany
-    {
-        return $this->hasMany(RolePrivilege::class);
+        return $this->belongsTo(Role::class);
     }
 }

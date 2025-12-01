@@ -47,6 +47,8 @@ class ApplicationController extends Controller
             $updateData['current_step'] = $statusToStep[$validated['status']];
         }
         
+        $oldStatus = $application->status;
+
         \Illuminate\Support\Facades\Log::info('Updating Application Status', [
             'id' => $application->id,
             'status' => $validated['status'],
@@ -85,6 +87,22 @@ class ApplicationController extends Controller
             'type' => 'APPLICATION_STATUS_UPDATED',
             'related_id' => $application->id,
         ]);
+
+        // Publish to RabbitMQ for Go Worker (Email Notification)
+        try {
+            $mqService = new \App\Services\RabbitMQService();
+            $eventData = [
+                'candidate_id' => $application->candidate_id,
+                'new_status' => $validated['status'],
+                'old_status' => $oldStatus,
+                'updated_by' => auth()->id() ?? 'system',
+                'timestamp' => now()->toIso8601String(),
+            ];
+            
+            $mqService->publish('status.changed', $eventData);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to publish RabbitMQ message: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'Application status updated successfully.');
     }

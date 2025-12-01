@@ -158,3 +158,25 @@ Dokumen ini mencatat langkah-langkah implementasi teknis yang telah dilakukan pa
     - **Talent Pool**: Removed Position filter as per request.
 - [x] **Bug Fixes**:
     - **JobController**: Fixed `Call to undefined method authorize()` error by updating the base `Controller` to use `AuthorizesRequests` trait.
+
+## 12. Recent Updates (RBAC & Master Data Refinement)
+- [x] **Document Type Management**:
+    - **Soft Deletes**: Implemented `SoftDeletes` for `DocumentType` to handle foreign key constraints gracefully.
+    - **Format Management**: Added `allowed_mimetypes` management (PDF, Excel, MP4, etc.) in Master Data.
+- [x] **Role-Based Access Control (RBAC)**:
+    - **Infrastructure**:
+        - Created `RolePrivilege` model and table.
+        - Updated `User` model with `hasPermission($permission)` helper.
+        - Created `CheckPermission` middleware and registered it.
+        - Updated `AppServiceProvider` to share permissions with Inertia.
+    - **Role Management UI**:
+        - Created `MasterData/Roles/Index.vue` to manage roles and assign specific permissions.
+        - Superadmin has full access (`*`) by default (bypassed in checks).
+    - **Frontend Integration**:
+        - Updated `AppLayout.vue` to dynamically show/hide menu items based on permissions.
+        - Implemented `hasPermission` helper in Vue.
+- [x] **Environment Reset**:
+    - Created `clean:storage` command to wipe MinIO.
+    - Reset database and seeded with fresh data including RBAC permissions.
+- [x] **Bug Fixes**:
+    - **UI Unresponsive**: Fixed `Dropdown.vue` issue causing unresponsive UI after login.

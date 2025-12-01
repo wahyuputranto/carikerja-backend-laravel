@@ -13,17 +13,20 @@ const props = defineProps({
     jobs: Object,
     filters: Object,
     locations: Array,
+    categories: Array,
 });
 
 const search = ref(props.filters?.search || '');
 const status = ref(props.filters?.status || '');
 const location_id = ref(props.filters?.location_id || '');
+const job_category_id = ref(props.filters?.job_category_id || '');
 
-watch([search, status, location_id], debounce(([searchValue, statusValue, locationValue]) => {
+watch([search, status, location_id, job_category_id], debounce(([searchValue, statusValue, locationValue, categoryValue]) => {
     router.get(route('jobs.index'), { 
         search: searchValue,
         status: statusValue,
-        location_id: locationValue
+        location_id: locationValue,
+        job_category_id: categoryValue
     }, {
         preserveState: true,
         replace: true,
@@ -77,6 +80,17 @@ const getStatusBadge = (status) => {
                                 {{ loc.name }}
                             </option>
                         </select>
+
+                        <!-- Category Filter -->
+                        <select 
+                            v-model="job_category_id" 
+                            class="flex-1 sm:flex-none rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                        >
+                            <option value="">All Categories</option>
+                            <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                                {{ cat.name }}
+                            </option>
+                        </select>
                     </div>
 
                     <!-- Row 2: Search & Button -->
@@ -112,9 +126,14 @@ const getStatusBadge = (status) => {
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         <div v-for="job in jobs.data" :key="job.id" class="premium-card group">
                             <div class="flex justify-between items-start mb-3">
-                                <span :class="getStatusBadge(job.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
-                                    {{ job.status }}
-                                </span>
+                                <div class="flex flex-wrap gap-2">
+                                    <span :class="getStatusBadge(job.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
+                                        {{ job.status }}
+                                    </span>
+                                    <span v-if="job.job_category" class="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                                        {{ job.job_category.name }}
+                                    </span>
+                                </div>
                                 <span v-if="job.deadline" class="text-xs text-gray-500 dark:text-gray-400">
                                     Deadline: {{ new Date(job.deadline).toLocaleDateString() }}
                                 </span>
@@ -140,7 +159,7 @@ const getStatusBadge = (status) => {
                                     <svg class="h-4 w-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                     </svg>
-                                    {{ job.jobCategory?.name || 'N/A' }}
+                                    {{ job.job_category?.name || 'N/A' }}
                                 </div>
                                 <div class="flex items-center">
                                     <svg class="h-4 w-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

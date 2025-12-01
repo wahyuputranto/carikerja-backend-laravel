@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Notifications\Notifiable;
+
 class Candidate extends Model
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -68,5 +70,35 @@ class Candidate extends Model
     public function documents()
     {
         return $this->hasMany(Document::class);
+    }
+
+    public function personalDetail()
+    {
+        return $this->hasOne(CandidatePersonalDetail::class);
+    }
+
+    public function passports()
+    {
+        return $this->hasMany(CandidatePassport::class);
+    }
+
+    public function emergencyContacts()
+    {
+        return $this->hasMany(CandidateEmergencyContact::class);
+    }
+
+    public function nonFormalEducations()
+    {
+        return $this->hasMany(CandidateNonFormalEducation::class);
+    }
+
+    public function languages()
+    {
+        return $this->hasMany(CandidateLanguage::class);
+    }
+
+    public function interviews()
+    {
+        return $this->hasMany(Interview::class);
     }
 }
