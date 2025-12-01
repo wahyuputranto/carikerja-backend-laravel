@@ -28,7 +28,9 @@ class JobSeeder extends Seeder
         $targetCategories = [
             'customer-service',
             'operations-logistics',
-            'hospitality-tourism'
+            'Food & Beverage',
+            'Housekeeping',
+            'Security'
         ];
 
         $this->command->info('Seeding jobs for specific categories...');
