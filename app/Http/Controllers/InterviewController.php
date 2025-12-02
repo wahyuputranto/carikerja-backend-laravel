@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Application;
 use App\Models\Interview;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -25,7 +26,7 @@ class InterviewController extends Controller
 
         // Create Interview
         if ($validated['scheduled_at']) {
-            Interview::create([
+            $interview = Interview::create([
                 'application_id' => $application ? $application->id : null,
                 'candidate_id' => $application ? $application->candidate_id : ($validated['candidate_id'] ?? null),
                 'interviewer_id' => Auth::id(),
@@ -35,6 +36,15 @@ class InterviewController extends Controller
                 'location_address' => $validated['address'] ?? null,
                 'feedback_notes' => $validated['notes'],
                 'stage' => $stage,
+            ]);
+
+            Notification::create([
+                'user_id' => $interview->candidate_id,
+                'title' => 'Interview Scheduled',
+                'message' => 'You have a new interview scheduled for ' . $interview->scheduled_at->format('d M Y H:i'),
+                'type' => 'info',
+                'is_read' => false,
+                'related_id' => $interview->id,
             ]);
         }
 
@@ -171,6 +181,15 @@ class InterviewController extends Controller
             'meeting_link' => $validated['meeting_link'],
             'location_address' => $validated['address'] ?? null,
             'feedback_notes' => $validated['notes'],
+        ]);
+
+        Notification::create([
+            'user_id' => $interview->candidate_id,
+            'title' => 'Interview Rescheduled',
+            'message' => 'Your interview has been rescheduled to ' . $interview->scheduled_at->format('d M Y H:i'),
+            'type' => 'info',
+            'is_read' => false,
+            'related_id' => $interview->id,
         ]);
 
         return back()->with('success', 'Interview rescheduled successfully.');

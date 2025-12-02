@@ -19,7 +19,6 @@ class CandidatePersonalDetail extends Model
         'marital_status',
         'citizenship',
         'religion',
-        'computer_skills',
     ];
 
     public function candidate()

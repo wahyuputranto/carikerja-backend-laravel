@@ -23,7 +23,6 @@ class CandidateProfile extends Model
         'city',
         'province',
         'postal_code',
-        'last_education',
         'about_me',
         'photo_url',
         'cv_url',
