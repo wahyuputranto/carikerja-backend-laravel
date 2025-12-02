@@ -26,6 +26,8 @@ class DatabaseSeeder extends Seeder
             CandidateSeeder::class,
             JobSeeder::class,
             ApplicationSeeder::class,
+            InterviewSeeder::class,
+            NotificationSeeder::class,
         ]);
 
         $this->command->info('Database seeding completed successfully!');

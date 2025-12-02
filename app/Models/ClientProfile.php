@@ -20,6 +20,8 @@ class ClientProfile extends Model
         'address',
         'phone',
         'website',
+        'pic_name',
+        'pic_phone',
     ];
 
     protected static function boot()

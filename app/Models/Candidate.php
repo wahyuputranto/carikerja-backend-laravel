@@ -23,6 +23,7 @@ class Candidate extends Model
         'phone_verified_at',
         'hiring_status',
         'last_login_at',
+        'interested_job_category_id',
     ];
 
     protected $hidden = [

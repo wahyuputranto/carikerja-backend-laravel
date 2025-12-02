@@ -14,7 +14,7 @@ class RoleSeeder extends Seeder
     {
         $roles = [
             [
-                'id' => \Illuminate\Support\Str::uuid(),
+                'id' => (string) \Illuminate\Support\Str::uuid(),
                 'name' => 'Superadmin',
                 'slug' => 'superadmin',
                 'description' => 'Full system access',
@@ -22,7 +22,7 @@ class RoleSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => \Illuminate\Support\Str::uuid(),
+                'id' => (string) \Illuminate\Support\Str::uuid(),
                 'name' => 'Client',
                 'slug' => 'client',
                 'description' => 'Client company access',
@@ -30,7 +30,7 @@ class RoleSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => \Illuminate\Support\Str::uuid(),
+                'id' => (string) \Illuminate\Support\Str::uuid(),
                 'name' => 'Vendor',
                 'slug' => 'vendor',
                 'description' => 'Vendor company access',
