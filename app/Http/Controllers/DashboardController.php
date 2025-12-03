@@ -29,7 +29,7 @@ class DashboardController extends Controller
                 'total_applications' => Application::count(),
             ];
 
-            $recentJobs = Job::with(['clientProfile.user', 'jobCategory', 'location'])
+            $recentJobs = Job::with(['client', 'jobCategory', 'location'])
                 ->latest()
                 ->take(5)
                 ->get();
@@ -52,22 +52,22 @@ class DashboardController extends Controller
                     return $candidate;
                 });
 
-        } elseif ($user->hasRole('client')) {
+        } elseif (auth()->guard('client')->check()) {
             // Client Stats
-            $clientProfileId = $user->clientProfile->id;
+            $clientId = auth()->guard('client')->id();
 
             $stats = [
-                'total_jobs' => Job::where('client_profile_id', $clientProfileId)->count(),
-                'active_jobs' => Job::where('client_profile_id', $clientProfileId)
+                'total_jobs' => Job::where('client_profile_id', $clientId)->count(),
+                'active_jobs' => Job::where('client_profile_id', $clientId)
                     ->where('status', 'PUBLISHED')
                     ->count(),
                 // Applications for this client's jobs
-                'total_applications' => Application::whereHas('job', function ($query) use ($clientProfileId) {
-                    $query->where('client_profile_id', $clientProfileId);
+                'total_applications' => Application::whereHas('job', function ($query) use ($clientId) {
+                    $query->where('client_profile_id', $clientId);
                 })->count(),
             ];
 
-            $recentJobs = Job::where('client_profile_id', $clientProfileId)
+            $recentJobs = Job::where('client_profile_id', $clientId)
                 ->with(['jobCategory', 'location'])
                 ->latest()
                 ->take(5)

@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             MasterDocumentTypeSeeder::class,
             SuperadminSeeder::class,
             RecruiterSeeder::class, // Create Recruiter user
-            ClientProfileSeeder::class,
+            ClientSeeder::class,
             CandidateSeeder::class,
             JobSeeder::class,
             ApplicationSeeder::class,

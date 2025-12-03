@@ -6,7 +6,7 @@ use App\Models\Job;
 use App\Models\JobCategory;
 use App\Models\Location;
 use App\Models\DocumentType;
-use App\Models\ClientProfile;
+use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -15,7 +15,7 @@ class JobController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Job::with(['jobCategory', 'location.parent.parent', 'clientProfile.user']);
+        $query = Job::with(['jobCategory', 'location.parent.parent', 'client']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -38,8 +38,8 @@ class JobController extends Controller
         }
 
         // If user is a client, only show their jobs
-        if (auth()->user()->hasRole('client')) {
-            $query->where('client_profile_id', auth()->user()->clientProfile->id);
+        if (auth()->guard('client')->check()) {
+            $query->where('client_profile_id', auth()->guard('client')->id());
         }
         
         $jobs = $query->latest()->paginate(15)->withQueryString();
@@ -59,7 +59,7 @@ class JobController extends Controller
         return Inertia::render('Jobs/Create', [
             'categories' => JobCategory::all(),
             'locations' => Location::where('type', 'CITY')->with('parent')->get(),
-            'clients' => auth()->user()->hasRole('superadmin') ? ClientProfile::with('user')->get() : null,
+            'clients' => auth()->user()?->hasRole('superadmin') ? Client::all() : null,
         ]);
     }
 
@@ -76,11 +76,11 @@ class JobController extends Controller
             'quota' => 'required|integer|min:1',
             'deadline' => 'nullable|date|after:today',
             'status' => 'required|in:DRAFT,PUBLISHED,CLOSED',
-            'client_profile_id' => auth()->user()->hasRole('superadmin') ? 'required|exists:client_profiles,id' : 'nullable',
+            'client_profile_id' => auth()->user()?->hasRole('superadmin') ? 'required|exists:clients,id' : 'nullable',
         ]);
         
-        if (auth()->user()->hasRole('client')) {
-            $validated['client_profile_id'] = $request->user()->clientProfile->id;
+        if (auth()->guard('client')->check()) {
+            $validated['client_profile_id'] = auth()->guard('client')->id();
         }
 
         $validated['slug'] = Str::slug($validated['title'] . '-' . uniqid());
@@ -99,7 +99,7 @@ class JobController extends Controller
             'job' => $job->load(['jobCategory', 'location']),
             'categories' => JobCategory::all(),
             'locations' => Location::where('type', 'CITY')->with('parent')->get(),
-            'clients' => auth()->user()->hasRole('superadmin') ? ClientProfile::with('user')->get() : null,
+            'clients' => auth()->user()?->hasRole('superadmin') ? Client::all() : null,
         ]);
     }
 
@@ -118,10 +118,10 @@ class JobController extends Controller
             'quota' => 'required|integer|min:1',
             'deadline' => 'nullable|date',
             'status' => 'required|in:DRAFT,PUBLISHED,CLOSED',
-            'client_profile_id' => auth()->user()->hasRole('superadmin') ? 'required|exists:client_profiles,id' : 'nullable',
+            'client_profile_id' => auth()->user()?->hasRole('superadmin') ? 'required|exists:clients,id' : 'nullable',
         ]);
 
-        if (auth()->user()->hasRole('superadmin')) {
+        if (auth()->user()?->hasRole('superadmin')) {
             $job->client_profile_id = $validated['client_profile_id'];
         }
 

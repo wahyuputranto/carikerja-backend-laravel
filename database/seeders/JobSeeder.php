@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\ClientProfile;
+use App\Models\Client;
 use App\Models\Job;
 use App\Models\JobCategory;
 use App\Models\Location;
@@ -16,7 +16,7 @@ class JobSeeder extends Seeder
      */
     public function run(): void
     {
-        $clientProfileIds = ClientProfile::pluck('id');
+        $clientProfileIds = Client::pluck('id');
         $jobCategoryIds = JobCategory::pluck('id');
         $locationIds = Location::where('type', 'CITY')->pluck('id');
 

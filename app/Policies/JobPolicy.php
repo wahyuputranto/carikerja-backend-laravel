@@ -35,14 +35,14 @@ class JobPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Job $job): bool
+    public function update(User|null $user, Job $job): bool
     {
-        if ($user->hasRole('superadmin')) {
+        if ($user && $user->hasRole('superadmin')) {
             return true;
         }
 
-        if ($user->hasRole('client')) {
-            return $user->clientProfile?->id === $job->client_profile_id;
+        if (auth()->guard('client')->check()) {
+            return auth()->guard('client')->id() === $job->client_profile_id;
         }
 
         return false;
@@ -51,14 +51,14 @@ class JobPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Job $job): bool
+    public function delete(User|null $user, Job $job): bool
     {
-        if ($user->hasRole('superadmin')) {
+        if ($user && $user->hasRole('superadmin')) {
             return true;
         }
 
-        if ($user->hasRole('client')) {
-            return $user->clientProfile?->id === $job->client_profile_id;
+        if (auth()->guard('client')->check()) {
+            return auth()->guard('client')->id() === $job->client_profile_id;
         }
 
         return false;

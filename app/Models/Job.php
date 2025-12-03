@@ -51,9 +51,9 @@ class Job extends Model
         });
     }
 
-    public function clientProfile(): BelongsTo
+    public function client(): BelongsTo
     {
-        return $this->belongsTo(ClientProfile::class);
+        return $this->belongsTo(Client::class, 'client_profile_id');
     }
 
     public function jobCategory(): BelongsTo

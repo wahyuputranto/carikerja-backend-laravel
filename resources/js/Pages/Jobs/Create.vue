@@ -62,7 +62,7 @@ const submit = () => {
                             required
                         >
                             <option v-for="client in clients" :key="client.id" :value="client.id">
-                                {{ client.company_name }} ({{ client.user.name }})
+                                {{ client.company_name }} ({{ client.name }})
                             </option>
                         </select>
                         <InputError :message="form.errors.client_profile_id" class="mt-2" />

@@ -11,7 +11,7 @@ Route::get('/', function () {
 });
 
 // Protected routes (auth + verified)
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth:web,client', 'verified'])->group(function () {
     // Dashboard
     // Dashboard
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
@@ -91,9 +91,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Client Routes
+    // Client Routes
     Route::resource('clients', \App\Http\Controllers\ClientController::class)
         ->except(['show'])
         ->middleware('role:superadmin');
+    
+    // Client Batches Routes
+    Route::prefix('clients/{client}/batches')->name('clients.batches.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ClientBatchController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\ClientBatchController::class, 'store'])->name('store');
+        Route::put('/{batch}', [\App\Http\Controllers\ClientBatchController::class, 'update'])->name('update');
+        Route::delete('/{batch}', [\App\Http\Controllers\ClientBatchController::class, 'destroy'])->name('destroy');
+    });
 
     // Profile management
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

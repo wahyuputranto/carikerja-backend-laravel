@@ -81,13 +81,7 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
     
-    /**
-     * Get the client profile associated with the user.
-     */
-    public function clientProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
-    {
-        return $this->hasOne(ClientProfile::class);
-    }
+
 
     /**
      * Check if the user has a specific role.

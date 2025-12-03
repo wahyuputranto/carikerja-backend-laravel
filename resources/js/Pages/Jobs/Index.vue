@@ -144,7 +144,7 @@ const getStatusBadge = (status) => {
                             </h3>
                             
                             <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                                {{ job.client_profile?.company_name || 'Unknown Client' }}
+                                {{ job.client?.company_name || 'Unknown Client' }}
                             </p>
                             
                             <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">

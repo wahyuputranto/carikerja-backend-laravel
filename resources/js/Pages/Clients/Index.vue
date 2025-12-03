@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, useForm, router } from '@inertiajs/vue3';
+import { Head, useForm, router, Link } from '@inertiajs/vue3';
 import Pagination from '@/Components/Pagination.vue';
 import PremiumButton from '@/Components/PremiumButton.vue';
 import Modal from '@/Components/Modal.vue';
@@ -55,12 +55,12 @@ const openEditModal = (item) => {
     form.reset();
     form.name = item.name;
     form.email = item.email;
-    form.company_name = item.client_profile?.company_name;
-    form.industry = item.client_profile?.industry;
-    form.address = item.client_profile?.address;
-    form.website = item.client_profile?.website;
-    form.pic_name = item.client_profile?.pic_name;
-    form.pic_phone = item.client_profile?.pic_phone;
+    form.company_name = item.company_name;
+    form.industry = item.industry;
+    form.address = item.address;
+    form.website = item.website;
+    form.pic_name = item.pic_name;
+    form.pic_phone = item.pic_phone;
     showModal.value = true;
 };
 
@@ -126,8 +126,8 @@ const deleteItem = (item) => {
                         <div v-for="client in clients.data" :key="client.id" class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
                             <div class="flex justify-between items-start mb-3">
                                 <div>
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ client.client_profile?.company_name || 'N/A' }}</h3>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ client.client_profile?.industry || 'N/A' }}</p>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ client.company_name || 'N/A' }}</h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ client.industry || 'N/A' }}</p>
                                 </div>
                                 <div class="flex space-x-2">
                                     <button @click="openEditModal(client)" class="p-1 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded">
@@ -141,7 +141,7 @@ const deleteItem = (item) => {
                             <div class="space-y-2 text-sm">
                                 <div class="flex items-center text-gray-600 dark:text-gray-300">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                                    <span>{{ client.client_profile?.pic_name || 'N/A' }}</span>
+                                    <span>{{ client.pic_name || 'N/A' }}</span>
                                 </div>
                                 <div class="flex items-center text-gray-600 dark:text-gray-300">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v9a2 2 0 002 2z"></path></svg>
@@ -168,20 +168,21 @@ const deleteItem = (item) => {
                         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="client in clients.data" :key="client.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ client.client_profile?.company_name || 'N/A' }}</div>
+                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ client.company_name || 'N/A' }}</div>
                                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ client.name }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900 dark:text-gray-100">{{ client.client_profile?.pic_name || 'N/A' }}</div>
+                                    <div class="text-sm text-gray-900 dark:text-gray-100">{{ client.pic_name || 'N/A' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ client.email }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ client.client_profile?.industry || 'N/A' }}</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ client.industry || 'N/A' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <button @click="openEditModal(client)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 mr-4">Edit</button>
+                                    <Link :href="route('clients.batches.index', client.id)" class="text-green-600 dark:text-green-400 hover:text-green-900 mr-4">Batches</Link>
                                     <button @click="deleteItem(client)" class="text-red-600 dark:text-red-400 hover:text-red-900">Delete</button>
                                 </td>
                             </tr>

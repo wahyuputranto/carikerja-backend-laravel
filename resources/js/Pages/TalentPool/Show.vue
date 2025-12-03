@@ -571,7 +571,7 @@ const getWhatsappUrl = (phone) => {
                         <div v-for="app in candidate.applications" :key="app.id">
                             <div v-if="app.documents && app.documents.length > 0">
                                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                    {{ app.job?.title }} - {{ app.job?.client_profile?.company_name }}
+                                    {{ app.job?.title }} - {{ app.job?.client?.company_name }}
                                 </h3>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div v-for="doc in app.documents" :key="doc.id" class="border border-purple-200 dark:border-purple-800 rounded-lg p-4 flex items-center justify-between bg-purple-50 dark:bg-purple-900/10">
@@ -602,7 +602,7 @@ const getWhatsappUrl = (phone) => {
                                 <div>
                                     <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ app.job?.title || 'Unknown Position' }}</h3>
                                     <p class="text-sm font-medium text-gray-600 dark:text-gray-300 mt-1">
-                                        {{ app.job?.client_profile?.company_name || 'Unknown Company' }}
+                                        {{ app.job?.client?.company_name || 'Unknown Company' }}
                                     </p>
                                     <div class="flex items-center gap-3 mt-2 text-xs text-gray-500 dark:text-gray-400">
                                         <span class="flex items-center">
