@@ -95,6 +95,7 @@ class TalentPoolController extends Controller
             'applications.job.clientProfile',
             'applications.job.location.parent.parent',
             'applications.deployment', // Load deployment details
+            'applications.documents', // Load client uploaded documents
         ]);
 
         if ($candidate->profile && $candidate->profile->photo_url) {

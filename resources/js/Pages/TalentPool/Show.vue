@@ -558,6 +558,39 @@ const getWhatsappUrl = (phone) => {
                 </div>
             </div>
 
+            <!-- Client Documents (New Section) -->
+            <div v-if="candidate.applications && candidate.applications.some(app => app.documents && app.documents.length > 0)" class="mt-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card">
+                <div class="p-6">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                        <svg class="h-6 w-6 mr-2 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                        </svg>
+                        Client Documents (Contracts & Offerings)
+                    </h2>
+                    <div class="space-y-4">
+                        <div v-for="app in candidate.applications" :key="app.id">
+                            <div v-if="app.documents && app.documents.length > 0">
+                                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                    {{ app.job?.title }} - {{ app.job?.client_profile?.company_name }}
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div v-for="doc in app.documents" :key="doc.id" class="border border-purple-200 dark:border-purple-800 rounded-lg p-4 flex items-center justify-between bg-purple-50 dark:bg-purple-900/10">
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900 dark:text-gray-100">{{ doc.title }}</h4>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Uploaded by Client: {{ formatDate(doc.created_at) }}</p>
+                                        </div>
+                                        <a :href="doc.file_path" target="_blank" class="text-purple-600 hover:text-purple-800 text-sm font-medium flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                            Download
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Applications History -->
             <div v-if="candidate.applications && candidate.applications.length > 0" class="mt-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card">
                 <div class="p-6">

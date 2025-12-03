@@ -26,4 +26,9 @@ class Application extends Model
     {
         return $this->hasOne(Deployment::class, 'application_id');
     }
+
+    public function documents()
+    {
+        return $this->hasMany(ApplicationDocument::class, 'application_id');
+    }
 }
