@@ -491,11 +491,21 @@ const getWhatsappUrl = (phone) => {
                         </div>
 
                         <!-- Computer Skills -->
-                        <div v-if="candidate.personal_detail?.computer_skills">
+                        <!-- Computer Skills -->
+                        <div v-if="candidate.computer_skills && candidate.computer_skills.length > 0">
                             <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2 text-sm uppercase tracking-wider">Computer Skills</h3>
-                            <p class="text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/30 p-3 rounded text-sm">
-                                {{ candidate.personal_detail.computer_skills }}
-                            </p>
+                            <div class="space-y-2">
+                                <div v-for="skill in candidate.computer_skills" :key="skill.id" class="flex justify-between items-center bg-gray-50 dark:bg-gray-700/30 p-2 rounded">
+                                    <span class="font-medium text-gray-900 dark:text-gray-200 text-sm">{{ skill.skill_name }}</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-2 py-1 rounded shadow-sm border border-gray-100 dark:border-gray-600">
+                                        {{ skill.proficiency_level }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else class="mt-4">
+                             <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2 text-sm uppercase tracking-wider">Computer Skills</h3>
+                             <p class="text-gray-500 dark:text-gray-400 italic text-sm">No computer skills recorded.</p>
                         </div>
                     </div>
                 </div>

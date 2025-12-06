@@ -18,7 +18,7 @@ const emit = defineEmits(['close', 'submitted']);
 
 const form = useForm({
     languages: [],
-    computer_skills: '',
+    computer_skills: [],
     notes: '',
     result: 'PASSED',
 });
@@ -38,7 +38,14 @@ watch(() => props.show, (newVal) => {
         }
 
         // Pre-fill computer skills
-        form.computer_skills = props.candidate.personal_detail?.computer_skills || '';
+        if (props.candidate.computer_skills && props.candidate.computer_skills.length > 0) {
+            form.computer_skills = props.candidate.computer_skills.map(s => ({
+                skill_name: s.skill_name,
+                proficiency_level: s.proficiency_level
+            }));
+        } else {
+            form.computer_skills = [{ skill_name: '', proficiency_level: 'Fair' }];
+        }
         form.notes = '';
         form.result = 'PASSED';
     }
@@ -50,6 +57,14 @@ const addLanguage = () => {
 
 const removeLanguage = (index) => {
     form.languages.splice(index, 1);
+};
+
+const addComputerSkill = () => {
+    form.computer_skills.push({ skill_name: '', proficiency_level: 'Fair' });
+};
+
+const removeComputerSkill = (index) => {
+    form.computer_skills.splice(index, 1);
 };
 
 const submit = () => {
@@ -144,14 +159,30 @@ const close = () => {
 
             <!-- Computer Skills -->
             <div>
-                <InputLabel for="computer_skills" value="Computer Skills" />
-                <textarea
-                    id="computer_skills"
-                    v-model="form.computer_skills"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                    rows="3"
-                    placeholder="List computer skills..."
-                ></textarea>
+                <div class="flex justify-between items-center mb-2">
+                    <InputLabel value="Computer Skills" />
+                    <button @click="addComputerSkill" type="button" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        Add Skill
+                    </button>
+                </div>
+                <div v-for="(skill, index) in form.computer_skills" :key="index" class="bg-gray-50 dark:bg-gray-700/30 p-3 rounded-lg mb-2 relative group">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="md:col-span-2">
+                            <TextInput v-model="skill.skill_name" placeholder="Skill Name (e.g. MS Excel)" class="w-full text-sm" />
+                        </div>
+                        <div>
+                            <select v-model="skill.proficiency_level" class="w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 rounded-md">
+                                <option value="Fair">Fair</option>
+                                <option value="Good">Good</option>
+                                <option value="Expert">Expert</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-3 flex items-center justify-end">
+                             <button @click="removeComputerSkill(index)" type="button" class="text-red-500 hover:text-red-700 text-xs">Remove</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Notes & Result -->

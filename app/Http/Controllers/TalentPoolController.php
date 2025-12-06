@@ -88,6 +88,7 @@ class TalentPoolController extends Controller
             'emergencyContacts',
             'nonFormalEducations',
             'languages',
+            'computerSkills',
             'interviews', // Load candidate level interviews
             'educations',
             'experiences',

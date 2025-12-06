@@ -112,7 +112,9 @@ class InterviewController extends Controller
             'languages.*.speaking' => 'nullable|string',
             'languages.*.reading' => 'nullable|string',
             'languages.*.writing' => 'nullable|string',
-            'computer_skills' => 'nullable|string',
+            'computer_skills' => 'array',
+            'computer_skills.*.skill_name' => 'required|string',
+            'computer_skills.*.proficiency_level' => 'nullable|string',
             'notes' => 'nullable|string',
             'result' => 'required|in:PASSED,FAILED',
             'candidate_id' => 'required_without:application|exists:candidates,id',
@@ -128,10 +130,12 @@ class InterviewController extends Controller
         }
 
         // 2. Update Computer Skills
-        $candidate->personalDetail()->updateOrCreate(
-            ['candidate_id' => $candidate->id],
-            ['computer_skills' => $validated['computer_skills']]
-        );
+        $candidate->computerSkills()->delete(); // Replace existing
+        if (!empty($validated['computer_skills'])) {
+            foreach ($validated['computer_skills'] as $skill) {
+                $candidate->computerSkills()->create($skill);
+            }
+        }
 
         // 3. Update Interview Record (Find the latest PRE_INTERVIEW for this candidate)
         $interview = Interview::where('candidate_id', $candidate->id)
