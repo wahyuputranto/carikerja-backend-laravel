@@ -4,41 +4,42 @@ namespace App\Services;
 
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
-use Illuminate\Support\Facades\Log;
 
 class RabbitMQService
 {
-    public function publish($routingKey, $data)
+    protected $connection;
+    protected $channel;
+    protected $exchange;
+
+    public function __construct()
     {
         $host = env('RABBITMQ_HOST', 'localhost');
         $port = env('RABBITMQ_PORT', 5672);
         $user = env('RABBITMQ_USER', 'guest');
         $pass = env('RABBITMQ_PASSWORD', 'guest');
         $vhost = env('RABBITMQ_VHOST', '/');
-        $exchange = env('RABBITMQ_EXCHANGE', 'agency_events');
+        $this->exchange = env('RABBITMQ_EXCHANGE', 'agency_events');
+        
+        $this->connection = new AMQPStreamConnection($host, $port, $user, $pass, $vhost);
+        $this->channel = $this->connection->channel();
+        
+        // Ensure exchange exists
+        $this->channel->exchange_declare($this->exchange, 'topic', false, true, false);
+    }
 
-        try {
-            $connection = new AMQPStreamConnection($host, $port, $user, $pass, $vhost);
-            $channel = $connection->channel();
+    public function publish($routingKey, $data)
+    {
+        $msg = new AMQPMessage(
+            json_encode($data),
+            ['delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT]
+        );
 
-            // Declare exchange to ensure it exists
-            $channel->exchange_declare($exchange, 'topic', false, true, false);
+        $this->channel->basic_publish($msg, $this->exchange, $routingKey);
+    }
 
-            $msg = new AMQPMessage(
-                json_encode($data),
-                ['delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT]
-            );
-
-            $channel->basic_publish($msg, $exchange, $routingKey);
-
-            $channel->close();
-            $connection->close();
-            
-            Log::info("RabbitMQ: Published message to {$exchange} -> {$routingKey}");
-            return true;
-        } catch (\Exception $e) {
-            Log::error('RabbitMQ Publish Error: ' . $e->getMessage());
-            return false;
-        }
+    public function __destruct()
+    {
+        $this->channel->close();
+        $this->connection->close();
     }
 }

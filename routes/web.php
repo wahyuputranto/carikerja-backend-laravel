@@ -55,6 +55,9 @@ Route::middleware(['auth:web,client', 'verified'])->group(function () {
         
         // Secure Document Viewer
         Route::post('/{candidate}/document-url', [\App\Http\Controllers\TalentPoolController::class, 'getDocumentUrl'])->name('document-url');
+        
+        // Generate CV
+        Route::post('/{candidate}/generate-cv', [\App\Http\Controllers\TalentPoolController::class, 'generateCV'])->name('generate-cv');
     });
 
     // Candidate Document Routes

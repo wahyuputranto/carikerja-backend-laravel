@@ -204,4 +204,16 @@ class TalentPoolController extends Controller
 
         return response()->json(['url' => $url]);
     }
+
+    public function generateCV(Request $request, \App\Services\RabbitMQService $rabbitMQ, Candidate $candidate)
+    {
+        // Publish to RabbitMQ
+        $rabbitMQ->publish('generate.cv.pdf', [
+            'candidate_id' => $candidate->id,
+            'requested_by' => auth()->id(),
+            'template' => 'standard'
+        ]);
+
+        return back()->with('success', 'CV generation request sent to background worker.');
+    }
 }
