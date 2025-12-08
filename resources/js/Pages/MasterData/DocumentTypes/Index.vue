@@ -21,10 +21,6 @@ const props = defineProps({
 
 const availableMimeTypes = [
     { label: 'PDF', value: 'application/pdf' },
-    { label: 'Excel (XLSX)', value: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
-    { label: 'Excel (XLS)', value: 'application/vnd.ms-excel' },
-    { label: 'Word (DOCX)', value: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
-    { label: 'Word (DOC)', value: 'application/msword' },
     { label: 'Image (JPEG)', value: 'image/jpeg' },
     { label: 'Image (PNG)', value: 'image/png' },
     { label: 'Video (MP4)', value: 'video/mp4' },
@@ -37,12 +33,18 @@ const form = useForm({
     is_mandatory: false,
     chunkable: false,
     allowed_mimetypes: [],
+    max_size: 1000,
+    notes: '',
+    template: null,
 });
 
 const openCreateModal = () => {
     editingItem.value = null;
     form.reset();
     form.allowed_mimetypes = [];
+    form.max_size = 1000;
+    form.notes = '';
+    form.template = null;
     showModal.value = true;
 };
 
@@ -52,6 +54,9 @@ const openEditModal = (item) => {
     form.is_mandatory = !!item.is_mandatory;
     form.chunkable = !!item.chunkable;
     form.allowed_mimetypes = Array.isArray(item.allowed_mimetypes) ? item.allowed_mimetypes : [];
+    form.max_size = item.max_size || 1000;
+    form.notes = item.notes || '';
+    form.template = null;
     showModal.value = true;
 };
 
@@ -62,7 +67,10 @@ const closeModal = () => {
 
 const submit = () => {
     if (editingItem.value) {
-        form.put(route('master-data.document-types.update', editingItem.value.id), {
+        form.transform((data) => ({
+            ...data,
+            _method: 'put',
+        })).post(route('master-data.document-types.update', editingItem.value.id), {
             onSuccess: () => closeModal(),
         });
     } else {
@@ -219,12 +227,68 @@ const deleteItem = (item) => {
                         <div class="grid grid-cols-2 gap-2">
                             <label v-for="type in availableMimeTypes" :key="type.value" class="flex items-center">
                                 <Checkbox :checked="form.allowed_mimetypes.includes(type.value)" @update:checked="(checked) => {
-                                    if (checked) form.allowed_mimetypes.push(type.value);
-                                    else form.allowed_mimetypes = form.allowed_mimetypes.filter(t => t !== type.value);
+                                    if (checked) {
+                                        form.allowed_mimetypes.push(type.value);
+                                        // Set default max size based on type if added
+                                        if (type.value === 'video/mp4') form.max_size = 12000;
+                                        else if (form.max_size === 12000 && !form.allowed_mimetypes.includes('video/mp4')) form.max_size = 1000;
+                                        else if (!form.max_size) form.max_size = 1000;
+                                    } else {
+                                        form.allowed_mimetypes = form.allowed_mimetypes.filter(t => t !== type.value);
+                                        // Revert max size if video removed and it was high
+                                        if (type.value === 'video/mp4' && form.max_size === 12000) form.max_size = 1000;
+                                    }
                                 }" />
                                 <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">{{ type.label }}</span>
                             </label>
                         </div>
+                    </div>
+
+                    <div>
+                        <InputLabel for="max_size" value="Max Size (KB)" />
+                        <TextInput
+                            id="max_size"
+                            v-model="form.max_size"
+                            type="number"
+                            class="mt-1 block w-full"
+                            placeholder="1000"
+                        />
+                        <InputError :message="form.errors.max_size" class="mt-2" />
+                    </div>
+
+                    <div>
+                        <InputLabel for="notes" value="Notes (Optional)" />
+                        <textarea
+                            id="notes"
+                            v-model="form.notes"
+                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                            rows="3"
+                            placeholder="Instructions for the candidate..."
+                        ></textarea>
+                        <InputError :message="form.errors.notes" class="mt-2" />
+                    </div>
+
+                    <div>
+                        <InputLabel for="template" value="Template File (Optional)" />
+                        <div v-if="editingItem && editingItem.template_url" class="mb-2">
+                            <a :href="editingItem.template_url" target="_blank" class="text-sm text-indigo-600 hover:text-indigo-900 underline">
+                                View Current Template
+                            </a>
+                        </div>
+                        <input
+                            type="file"
+                            id="template"
+                            @input="form.template = $event.target.files[0]"
+                            class="mt-1 block w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-indigo-50 file:text-indigo-700
+                                hover:file:bg-indigo-100
+                            "
+                        />
+                        <InputError :message="form.errors.template" class="mt-2" />
+                        <p class="mt-1 text-xs text-gray-500">Allowed: PDF, Images, MP4. Max 10MB.</p>
                     </div>
                 </div>
 

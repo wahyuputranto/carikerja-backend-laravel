@@ -24,9 +24,17 @@ class DocumentTypeController extends Controller
             'is_mandatory' => 'boolean',
             'chunkable' => 'boolean',
             'allowed_mimetypes' => 'nullable|array',
+            'allowed_mimetypes.*' => 'in:' . implode(',', DocumentType::ALLOWED_MIMETYPES),
+            'max_size' => 'required|integer|min:1',
+            'notes' => 'nullable|string',
+            'template' => 'nullable|file|max:10240', // 10MB max for template
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
+
+        if ($request->hasFile('template')) {
+            $validated['template'] = $request->file('template')->store('document_templates', 'public');
+        }
 
         DocumentType::create($validated);
 
@@ -40,10 +48,22 @@ class DocumentTypeController extends Controller
             'is_mandatory' => 'boolean',
             'chunkable' => 'boolean',
             'allowed_mimetypes' => 'nullable|array',
+            'allowed_mimetypes.*' => 'in:' . implode(',', DocumentType::ALLOWED_MIMETYPES),
+            'max_size' => 'required|integer|min:1',
+            'notes' => 'nullable|string',
+            'template' => 'nullable|file|max:10240',
         ]);
 
         if ($request->name !== $documentType->name) {
             $validated['slug'] = Str::slug($validated['name']);
+        }
+
+        if ($request->hasFile('template')) {
+            // Delete old template if exists
+            if ($documentType->template) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($documentType->template);
+            }
+            $validated['template'] = $request->file('template')->store('document_templates', 'public');
         }
 
         $documentType->update($validated);
