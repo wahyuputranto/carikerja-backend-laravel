@@ -7,6 +7,8 @@ use App\Models\ClientBatch;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
+use Illuminate\Validation\Rule;
+
 class ClientBatchController extends Controller
 {
     public function index(Client $client)
@@ -20,15 +22,21 @@ class ClientBatchController extends Controller
     public function store(Request $request, Client $client)
     {
         $validated = $request->validate([
-            'batch_name' => 'required|string|max:255',
+            'batch_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('client_batches')->where(function ($query) use ($client) {
+                    return $query->where('client_id', $client->id);
+                }),
+            ],
             'total_quota' => 'required|integer|min:1',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'is_active' => 'boolean',
         ]);
 
-        // If setting as active, deactivate others? Or allow multiple active?
-        // User requirement: "Satu client hanya boleh punya satu batch aktif"
+        // If setting as active, deactivate others
         if ($request->is_active) {
             $client->batches()->update(['is_active' => false]);
         }
@@ -41,7 +49,14 @@ class ClientBatchController extends Controller
     public function update(Request $request, Client $client, ClientBatch $batch)
     {
         $validated = $request->validate([
-            'batch_name' => 'required|string|max:255',
+            'batch_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('client_batches')->where(function ($query) use ($client) {
+                    return $query->where('client_id', $client->id);
+                })->ignore($batch->id),
+            ],
             'total_quota' => 'required|integer|min:1',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
@@ -59,6 +74,10 @@ class ClientBatchController extends Controller
 
     public function destroy(Client $client, ClientBatch $batch)
     {
+        if ($batch->used_quota > 0) {
+            return redirect()->back()->with('error', 'Cannot delete batch that has used quota.');
+        }
+
         $batch->delete();
         return redirect()->back()->with('success', 'Batch deleted successfully.');
     }

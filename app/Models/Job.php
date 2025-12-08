@@ -22,7 +22,7 @@ class Job extends Model
         'description',
         'requirements',
         'job_category_id',
-        'location_id',
+        'job_location_id',
         'salary_min',
         'salary_max',
         'quota',
@@ -61,9 +61,9 @@ class Job extends Model
         return $this->belongsTo(JobCategory::class, 'job_category_id');
     }
 
-    public function location(): BelongsTo
+    public function jobLocation(): BelongsTo
     {
-        return $this->belongsTo(Location::class, 'location_id');
+        return $this->belongsTo(JobLocation::class, 'job_location_id');
     }
 
     public function applications(): HasMany

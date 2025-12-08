@@ -11,16 +11,33 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Client Profiles
-        Schema::create('client_profiles', function (Blueprint $table) {
+        // Clients
+        Schema::create('clients', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
             $table->string('company_name');
             $table->string('industry')->nullable();
             $table->text('address')->nullable();
             $table->string('website')->nullable();
             $table->string('pic_name')->nullable();
             $table->string('pic_phone')->nullable();
+            $table->string('name')->nullable();
+            $table->string('email')->unique();
+            $table->string('password')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
+            $table->timestamps();
+        });
+
+        // Client Batches
+        Schema::create('client_batches', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('client_id')->constrained('clients')->cascadeOnDelete();
+            $table->string('batch_name');
+            $table->integer('total_quota');
+            $table->integer('used_quota')->default(0);
+            $table->boolean('is_active')->default(true);
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
             $table->timestamps();
         });
 
@@ -165,6 +182,15 @@ return new class extends Migration
             $table->string('proficiency_level')->default('Beginner');
             $table->timestamps();
         });
+
+        // Candidate Computer Skills
+        Schema::create('candidate_computer_skills', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('candidate_id')->constrained('candidates')->cascadeOnDelete();
+            $table->string('skill_name');
+            $table->string('proficiency_level')->default('Fair');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -183,6 +209,8 @@ return new class extends Migration
         Schema::dropIfExists('candidate_profiles');
         Schema::dropIfExists('candidates');
         Schema::dropIfExists('vendor_profiles');
-        Schema::dropIfExists('client_profiles');
+        Schema::dropIfExists('candidate_computer_skills');
+        Schema::dropIfExists('client_batches');
+        Schema::dropIfExists('clients');
     }
 };

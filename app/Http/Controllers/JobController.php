@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Job;
 use App\Models\JobCategory;
-use App\Models\Location;
+use App\Models\JobLocation;
 use App\Models\DocumentType;
 use App\Models\Client;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -15,7 +16,7 @@ class JobController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Job::with(['jobCategory', 'location.parent.parent', 'client']);
+        $query = Job::with(['jobCategory', 'jobLocation', 'client']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -29,8 +30,14 @@ class JobController extends Controller
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('location_id')) {
-            $query->where('location_id', $request->location_id);
+        if ($request->filled('job_location_id')) {
+            $query->where('job_location_id', $request->job_location_id);
+        }
+
+        if ($request->filled('country')) {
+            $query->whereHas('jobLocation', function ($q) use ($request) {
+                $q->where('country', $request->country);
+            });
         }
 
         if ($request->filled('job_category_id')) {
@@ -43,22 +50,36 @@ class JobController extends Controller
         }
         
         $jobs = $query->latest()->paginate(15)->withQueryString();
-        $locations = Location::where('type', 'CITY')->orderBy('name')->get(['id', 'name']);
+        $jobLocations = JobLocation::active()->orderBy('country')->orderBy('province')->orderBy('city')->get();
         $categories = JobCategory::orderBy('name')->get(['id', 'name']);
+
+        // Get unique countries for filter
+        $countries = JobLocation::active()
+            ->select('country')
+            ->distinct()
+            ->orderBy('country')
+            ->pluck('country');
 
         return Inertia::render('Jobs/Index', [
             'jobs' => $jobs,
-            'filters' => $request->only(['search', 'status', 'location_id', 'job_category_id']),
-            'locations' => $locations,
+            'filters' => $request->only(['search', 'status', 'job_location_id', 'country', 'job_category_id']),
+            'jobLocations' => $jobLocations,
+            'countries' => $countries,
             'categories' => $categories,
         ]);
     }
 
     public function create()
     {
+        $jobLocations = JobLocation::active()
+            ->orderBy('country')
+            ->orderBy('province')
+            ->orderBy('city')
+            ->get();
+
         return Inertia::render('Jobs/Create', [
             'categories' => JobCategory::all(),
-            'locations' => Location::where('type', 'CITY')->with('parent')->get(),
+            'jobLocations' => $jobLocations,
             'clients' => auth()->user()?->hasRole('superadmin') ? Client::all() : null,
         ]);
     }
@@ -70,7 +91,7 @@ class JobController extends Controller
             'description' => 'required|string',
             'requirements' => 'nullable|string',
             'job_category_id' => 'required|exists:master_job_categories,id',
-            'location_id' => 'required|exists:master_locations,id',
+            'job_location_id' => 'required|exists:job_locations,id',
             'salary_min' => 'nullable|numeric|min:0',
             'salary_max' => 'nullable|numeric|min:0',
             'quota' => 'required|integer|min:1',
@@ -85,7 +106,19 @@ class JobController extends Controller
 
         $validated['slug'] = Str::slug($validated['title'] . '-' . uniqid());
 
-        Job::create($validated);
+        $job = Job::create($validated);
+        
+        // Notify Client if Admin posted it
+        if (auth()->user() && auth()->user()->hasRole('superadmin') && !empty($validated['client_profile_id'])) {
+             Notification::create([
+                'user_id' => $validated['client_profile_id'],
+                'title' => 'New Job Posted by Admin',
+                'message' => 'Admin has posted a new job: ' . $job->title,
+                'type' => 'job_posted',
+                'is_read' => false,
+                'related_id' => $job->id,
+            ]);
+        }
 
         return redirect()->route('jobs.index')->with('success', 'Job posted successfully.');
     }
@@ -95,10 +128,16 @@ class JobController extends Controller
         // Policy check: only superadmin or the client who owns the job can edit
         $this->authorize('update', $job);
 
+        $jobLocations = JobLocation::active()
+            ->orderBy('country')
+            ->orderBy('province')
+            ->orderBy('city')
+            ->get();
+
         return Inertia::render('Jobs/Edit', [
-            'job' => $job->load(['jobCategory', 'location']),
+            'job' => $job->load(['jobCategory', 'jobLocation']),
             'categories' => JobCategory::all(),
-            'locations' => Location::where('type', 'CITY')->with('parent')->get(),
+            'jobLocations' => $jobLocations,
             'clients' => auth()->user()?->hasRole('superadmin') ? Client::all() : null,
         ]);
     }
@@ -112,7 +151,7 @@ class JobController extends Controller
             'description' => 'required|string',
             'requirements' => 'nullable|string',
             'job_category_id' => 'required|exists:master_job_categories,id',
-            'location_id' => 'required|exists:master_locations,id',
+            'job_location_id' => 'required|exists:job_locations,id',
             'salary_min' => 'nullable|numeric|min:0',
             'salary_max' => 'nullable|numeric|min:0',
             'quota' => 'required|integer|min:1',

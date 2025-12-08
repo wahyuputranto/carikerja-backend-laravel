@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\Client;
 use App\Models\Job;
 use App\Models\JobCategory;
-use App\Models\Location;
+use App\Models\JobLocation;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -18,10 +18,10 @@ class JobSeeder extends Seeder
     {
         $clientProfileIds = Client::pluck('id');
         $jobCategoryIds = JobCategory::pluck('id');
-        $locationIds = Location::where('type', 'CITY')->pluck('id');
+        $jobLocationIds = JobLocation::where('is_active', true)->pluck('id');
 
-        if ($clientProfileIds->isEmpty() || $jobCategoryIds->isEmpty() || $locationIds->isEmpty()) {
-            $this->command->warn('Cannot run JobSeeder because there are no clients, job categories, or city locations.');
+        if ($clientProfileIds->isEmpty() || $jobCategoryIds->isEmpty() || $jobLocationIds->isEmpty()) {
+            $this->command->warn('Cannot run JobSeeder because there are no clients, job categories, or job locations.');
             return;
         }
 
@@ -49,9 +49,10 @@ class JobSeeder extends Seeder
                 Job::factory()->create([
                     'client_profile_id' => $clientProfileIds->random(),
                     'job_category_id' => $category->id,
-                    'location_id' => $locationIds->random(),
+                    'job_location_id' => $jobLocationIds->random(),
                 ]);
             }
         }
     }
 }
+

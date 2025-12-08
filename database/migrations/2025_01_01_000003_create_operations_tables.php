@@ -11,16 +11,36 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Job Locations
+        Schema::create('job_locations', function (Blueprint $table) {
+            $table->id();
+            $table->string('country');
+            $table->string('province');
+            $table->string('city');
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+
+            $table->index(['country', 'province', 'city']);
+        });
+
         // Jobs
         Schema::create('jobs', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('client_profile_id')->constrained('client_profiles');
+            $table->foreignUuid('client_profile_id'); // Note: This references clients but existing code uses this name? Or we should rename it? skema has client_profile_id. Ideally we should use client_id but user wants to match skema.
+            // Let's check skema for jobs references. It has client_profile_id.
+            // We'll keep client_profile_id but if we can, we should constrain it to clients if possible? 
+            // Skema does NOT show a constraint in the CREATE TABLE.
+            // But let's assume it should reference clients.
+            // However, to strictly match SKEMA which has NO constraint visible in the create statement (maybe dropped?), I'll leave it as uuid.
+            // Wait, usually Laravel conventions imply constraints.
+            // Use just uuid to be safe and match the lack of constraint in skema dump if that's the case.
+            // Actually, skema shows "client_profile_id" uuid NOT NULL.
             $table->string('title');
             $table->string('slug')->unique();
             $table->text('description');
             $table->text('requirements')->nullable();
             $table->foreignId('job_category_id')->constrained('master_job_categories');
-            $table->foreignId('location_id')->constrained('master_locations');
+            $table->foreignId('job_location_id')->nullable()->constrained('job_locations');
             $table->decimal('salary_min', 15, 2)->nullable();
             $table->decimal('salary_max', 15, 2)->nullable();
             $table->integer('quota')->default(1);
@@ -58,7 +78,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('application_id')->nullable(); // Nullable for Pre-Interview
             $table->foreignUuid('candidate_id')->nullable()->constrained('candidates')->cascadeOnDelete();
-            $table->foreignUuid('interviewer_id')->constrained('users');
+            $table->foreignUuid('interviewer_id')->nullable(); // No constraint as per skema/migrations changes
             $table->string('stage')->default('USER_INTERVIEW'); // PRE_INTERVIEW, USER_INTERVIEW
             $table->timestamp('scheduled_at');
             $table->string('type'); // ONLINE, OFFLINE
@@ -104,6 +124,18 @@ return new class extends Migration
             $table->string('status')->default('PENDING'); // PENDING, UPLOADED, VALID, INVALID
             $table->text('rejection_note')->nullable();
             $table->timestamp('uploaded_at')->nullable();
+            $table->timestamps();
+        });
+
+        // Application Documents
+        Schema::create('application_documents', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('application_id')->constrained('job_applications')->cascadeOnDelete();
+            $table->uuid('uploader_id'); // Can be user or candidate
+            $table->string('title');
+            $table->string('file_path');
+            $table->bigInteger('file_size')->nullable();
+            $table->string('mime_type')->nullable();
             $table->timestamps();
         });
 
@@ -153,6 +185,12 @@ return new class extends Migration
         Schema::dropIfExists('deployments');
         Schema::dropIfExists('interviews');
         Schema::dropIfExists('job_applications');
+        Schema::dropIfExists('application_documents');
+        Schema::dropIfExists('candidate_documents');
+        Schema::dropIfExists('deployments');
+        Schema::dropIfExists('interviews');
+        Schema::dropIfExists('job_applications');
         Schema::dropIfExists('jobs');
+        Schema::dropIfExists('job_locations');
     }
 };

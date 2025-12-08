@@ -46,6 +46,18 @@ class InterviewController extends Controller
                 'is_read' => false,
                 'related_id' => $interview->id,
             ]);
+
+            // Notify Client if this is related to a job application
+            if ($application && $application->job && $application->job->client_profile_id) {
+                Notification::create([
+                    'user_id' => $application->job->client_profile_id,
+                    'title' => 'Interview Scheduled by Admin',
+                    'message' => 'Admin has scheduled an interview for candidate ' . ($application->candidate ? $application->candidate->name : 'Unknown') . ' for job ' . $application->job->title . ' on ' . $interview->scheduled_at->format('d M Y H:i'),
+                    'type' => 'interview_scheduled',
+                    'is_read' => false,
+                    'related_id' => $interview->id,
+                ]);
+            }
         }
 
         // If Application exists, update its status (User Interview flow)

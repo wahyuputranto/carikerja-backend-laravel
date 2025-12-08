@@ -94,7 +94,7 @@ class TalentPoolController extends Controller
             'experiences',
             'documents.documentType',
             'applications.job.client',
-            'applications.job.location.parent.parent',
+            'applications.job.jobLocation',
             'applications.deployment', // Load deployment details
             'applications.documents', // Load client uploaded documents
         ]);

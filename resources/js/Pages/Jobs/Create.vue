@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import PremiumButton from '@/Components/PremiumButton.vue';
@@ -7,6 +7,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import InputError from '@/Components/InputError.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 defineOptions({
     layout: AppLayout,
@@ -14,7 +15,7 @@ defineOptions({
 
 const props = defineProps({
     categories: Array,
-    locations: Array,
+    jobLocations: Array,
     clients: Array,
 });
 
@@ -26,7 +27,7 @@ const form = useForm({
     description: '',
     requirements: '',
     job_category_id: props.categories[0]?.id || '',
-    location_id: props.locations[0]?.id || '',
+    job_location_id: props.jobLocations[0]?.id || '',
     client_profile_id: props.clients?.[0]?.id || '',
     salary_min: '',
     salary_max: '',
@@ -35,9 +36,19 @@ const form = useForm({
     status: 'DRAFT',
 });
 
+// Format locations for searchable select
+const locationOptions = computed(() => {
+    return props.jobLocations.map(location => ({
+        value: location.id,
+        label: `${location.city}, ${location.province}`,
+        group: location.country
+    }));
+});
+
 const submit = () => {
     form.post(route('jobs.store'));
 };
+
 </script>
 
 <template>
@@ -76,7 +87,7 @@ const submit = () => {
                             v-model="form.title"
                             type="text"
                             class="mt-1 block w-full"
-                            placeholder="e.g. Senior Software Engineer"
+                            placeholder="e.g. Customer Service Representative"
                             required
                         />
                         <InputError :message="form.errors.title" class="mt-2" />
@@ -127,18 +138,13 @@ const submit = () => {
                         </div>
 
                         <div>
-                            <InputLabel for="location_id" value="Location *" />
-                            <select
-                                id="location_id"
-                                v-model="form.location_id"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                required
-                            >
-                                <option v-for="location in locations" :key="location.id" :value="location.id">
-                                    {{ location.name }}{{ location.parent ? ', ' + location.parent.name : '' }}
-                                </option>
-                            </select>
-                            <InputError :message="form.errors.location_id" class="mt-2" />
+                            <InputLabel for="job_location_id" value="Location *" />
+                            <SearchableSelect
+                                v-model="form.job_location_id"
+                                :options="locationOptions"
+                                placeholder="Search location (city, province, or country)..."
+                            />
+                            <InputError :message="form.errors.job_location_id" class="mt-2" />
                         </div>
                     </div>
 

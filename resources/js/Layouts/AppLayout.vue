@@ -70,12 +70,6 @@
                         <DropdownLink :href="route('master-data.job-categories.index')">
                             Job Categories
                         </DropdownLink>
-                        <DropdownLink :href="route('master-data.skills.index')">
-                            Skills
-                        </DropdownLink>
-                        <DropdownLink :href="route('master-data.locations.index')">
-                            Locations
-                        </DropdownLink>
                     </template>
                 </Dropdown>
             </div>
@@ -208,12 +202,6 @@
                   </InertiaLink>
                   <InertiaLink :href="route('master-data.job-categories.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm" :class="{ 'active': $page.component.startsWith('MasterData/JobCategories') }">
                     Job Categories
-                  </InertiaLink>
-                  <InertiaLink :href="route('master-data.skills.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm" :class="{ 'active': $page.component.startsWith('MasterData/Skills') }">
-                    Skills
-                  </InertiaLink>
-                  <InertiaLink :href="route('master-data.locations.index')" @click="isMobileMenuOpen = false" class="mobile-nav-link text-sm" :class="{ 'active': $page.component.startsWith('MasterData/Locations') }">
-                    Locations
                   </InertiaLink>
                 </div>
               </Transition>

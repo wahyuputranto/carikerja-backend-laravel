@@ -19,6 +19,15 @@ const props = defineProps({
     batches: Array,
 });
 
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    });
+};
+
 const showModal = ref(false);
 const editingItem = ref(null);
 const form = useForm({
@@ -40,8 +49,9 @@ const openEditModal = (item) => {
     form.reset();
     form.batch_name = item.batch_name;
     form.total_quota = item.total_quota;
-    form.start_date = item.start_date;
-    form.end_date = item.end_date;
+    // Format date for input field (YYYY-MM-DD) which is required for type="date"
+    form.start_date = item.start_date ? new Date(item.start_date).toISOString().split('T')[0] : '';
+    form.end_date = item.end_date ? new Date(item.end_date).toISOString().split('T')[0] : '';
     form.is_active = Boolean(item.is_active);
     showModal.value = true;
 };
@@ -112,7 +122,7 @@ const deleteItem = (item) => {
                                     / {{ batch.total_quota }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    {{ batch.start_date || 'N/A' }} - {{ batch.end_date || 'N/A' }}
+                                    {{ formatDate(batch.start_date) }} - {{ formatDate(batch.end_date) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span v-if="batch.is_active" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">

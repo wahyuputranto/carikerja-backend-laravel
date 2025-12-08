@@ -29,7 +29,7 @@ class DashboardController extends Controller
                 'total_applications' => Application::count(),
             ];
 
-            $recentJobs = Job::with(['client', 'jobCategory', 'location'])
+            $recentJobs = Job::with(['client', 'jobCategory', 'jobLocation'])
                 ->latest()
                 ->take(5)
                 ->get();
@@ -68,7 +68,7 @@ class DashboardController extends Controller
             ];
 
             $recentJobs = Job::where('client_profile_id', $clientId)
-                ->with(['jobCategory', 'location'])
+                ->with(['jobCategory', 'jobLocation'])
                 ->latest()
                 ->take(5)
                 ->get();

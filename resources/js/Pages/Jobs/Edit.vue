@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import PremiumButton from '@/Components/PremiumButton.vue';
@@ -8,6 +8,7 @@ import TextInput from '@/Components/TextInput.vue';
 import InputError from '@/Components/InputError.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 defineOptions({
     layout: AppLayout,
@@ -16,7 +17,7 @@ defineOptions({
 const props = defineProps({
     job: Object,
     categories: Array,
-    locations: Array,
+    jobLocations: Array,
     clients: Array,
 });
 
@@ -28,13 +29,22 @@ const form = useForm({
     description: props.job.description,
     requirements: props.job.requirements || '',
     job_category_id: props.job.job_category_id,
-    location_id: props.job.location_id,
+    job_location_id: props.job.job_location_id,
     client_profile_id: props.job.client_profile_id,
     salary_min: props.job.salary_min || '',
     salary_max: props.job.salary_max || '',
     quota: props.job.quota,
     deadline: props.job.deadline || '',
     status: props.job.status,
+});
+
+// Format locations for searchable select
+const locationOptions = computed(() => {
+    return props.jobLocations.map(location => ({
+        value: location.id,
+        label: `${location.city}, ${location.province}`,
+        group: location.country
+    }));
 });
 
 const submit = () => {
@@ -46,6 +56,7 @@ const deleteJob = () => {
         useForm({}).delete(route('jobs.destroy', props.job.id));
     }
 };
+
 </script>
 
 <template>
@@ -137,18 +148,13 @@ const deleteJob = () => {
                         </div>
 
                         <div>
-                            <InputLabel for="location_id" value="Location *" />
-                            <select
-                                id="location_id"
-                                v-model="form.location_id"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                required
-                            >
-                                <option v-for="location in locations" :key="location.id" :value="location.id">
-                                    {{ location.name }}{{ location.parent ? ', ' + location.parent.name : '' }}
-                                </option>
-                            </select>
-                            <InputError :message="form.errors.location_id" class="mt-2" />
+                            <InputLabel for="job_location_id" value="Location *" />
+                            <SearchableSelect
+                                v-model="form.job_location_id"
+                                :options="locationOptions"
+                                placeholder="Search location (city, province, or country)..."
+                            />
+                            <InputError :message="form.errors.job_location_id" class="mt-2" />
                         </div>
                     </div>
 

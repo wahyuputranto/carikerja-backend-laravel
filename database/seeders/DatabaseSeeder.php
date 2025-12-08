@@ -20,11 +20,13 @@ class DatabaseSeeder extends Seeder
             RolePrivilegeSeeder::class, // Add privileges and Recruiter role
             MasterDataSeeder::class,
             MasterDocumentTypeSeeder::class,
+            JobLocationSeeder::class, // Job locations for Turkey, Taiwan, Bulgaria
             SuperadminSeeder::class,
             RecruiterSeeder::class, // Create Recruiter user
             ClientSeeder::class,
             CandidateSeeder::class,
-            JobSeeder::class,
+            // JobSeeder::class,
+            SampleJobSeeder::class,
             ApplicationSeeder::class,
             InterviewSeeder::class,
             NotificationSeeder::class,

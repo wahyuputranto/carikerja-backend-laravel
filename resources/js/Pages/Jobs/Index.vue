@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import PremiumButton from '@/Components/PremiumButton.vue';
@@ -12,20 +12,21 @@ defineOptions({
 const props = defineProps({
     jobs: Object,
     filters: Object,
-    locations: Array,
+    jobLocations: Array,
+    countries: Array,
     categories: Array,
 });
 
 const search = ref(props.filters?.search || '');
 const status = ref(props.filters?.status || '');
-const location_id = ref(props.filters?.location_id || '');
+const country = ref(props.filters?.country || '');
 const job_category_id = ref(props.filters?.job_category_id || '');
 
-watch([search, status, location_id, job_category_id], debounce(([searchValue, statusValue, locationValue, categoryValue]) => {
+watch([search, status, country, job_category_id], debounce(([searchValue, statusValue, countryValue, categoryValue]) => {
     router.get(route('jobs.index'), { 
         search: searchValue,
         status: statusValue,
-        location_id: locationValue,
+        country: countryValue,
         job_category_id: categoryValue
     }, {
         preserveState: true,
@@ -70,14 +71,14 @@ const getStatusBadge = (status) => {
                             <option value="CLOSED">Closed</option>
                         </select>
 
-                        <!-- Location Filter -->
+                        <!-- Country Filter -->
                         <select 
-                            v-model="location_id" 
+                            v-model="country" 
                             class="flex-1 sm:flex-none rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 text-sm"
                         >
-                            <option value="">All Locations</option>
-                            <option v-for="loc in locations" :key="loc.id" :value="loc.id">
-                                {{ loc.name }}
+                            <option value="">All Countries</option>
+                            <option v-for="c in countries" :key="c" :value="c">
+                                {{ c }}
                             </option>
                         </select>
 
@@ -153,7 +154,10 @@ const getStatusBadge = (status) => {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                     </svg>
-                                    <span class="truncate">{{ job.location?.name }}, {{ job.location?.parent?.parent?.name }}</span>
+                                    <span class="truncate" v-if="job.job_location">
+                                        {{ job.job_location.city }}, {{ job.job_location.province }}, {{ job.job_location.country }}
+                                    </span>
+                                    <span v-else class="truncate">N/A</span>
                                 </div>
                                 <div class="flex items-center">
                                     <svg class="h-4 w-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

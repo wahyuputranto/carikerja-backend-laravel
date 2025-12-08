@@ -18,6 +18,7 @@ class MasterDataSeeder extends Seeder
             ['name' => 'Customer Service', 'slug' => 'customer-service'],
             ['name' => 'Operations & Logistics', 'slug' => 'operations-logistics'],
             ['name' => 'Hospitality & Tourism', 'slug' => 'hospitality-tourism'],
+            ['name' => 'Food & Beverage', 'slug' => 'food-beverage'],
         ];
 
         DB::table('master_job_categories')->truncate();
