@@ -15,5 +15,6 @@ class DocumentType extends Model
         'is_mandatory' => 'boolean',
         'chunkable' => 'boolean',
         'allowed_mimetypes' => 'array',
+        'max_size' => 'integer',
     ];
 }
