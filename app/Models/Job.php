@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 class Job extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\LogsActivity;
 
     protected $keyType = 'string';
     public $incrementing = false;

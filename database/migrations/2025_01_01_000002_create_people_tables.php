@@ -44,7 +44,7 @@ return new class extends Migration
         // Vendor Profiles
         Schema::create('vendor_profiles', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('company_name');
             $table->string('service_type');
             $table->text('address')->nullable();
@@ -73,11 +73,11 @@ return new class extends Migration
         // Candidate Profiles
         Schema::create('candidate_profiles', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('candidate_id')->unique()->constrained('candidates')->onDelete('cascade');
+            $table->foreignUuid('candidate_id')->unique()->constrained('candidates')->cascadeOnDelete();
             $table->string('nik')->unique()->nullable();
             $table->date('birth_date')->nullable();
             $table->string('birth_place')->nullable();
-            $table->string('gender')->nullable(); // M, F
+            $table->string('gender')->nullable();
             $table->text('address')->nullable();
             $table->string('city')->nullable();
             $table->string('province')->nullable();
@@ -91,7 +91,7 @@ return new class extends Migration
         // Candidate Personal Details
         Schema::create('candidate_personal_details', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('candidate_id')->unique()->constrained('candidates')->onDelete('cascade');
+            $table->foreignUuid('candidate_id')->unique()->constrained('candidates')->cascadeOnDelete();
             $table->string('fathers_name')->nullable();
             $table->string('mothers_name')->nullable();
             $table->integer('height')->nullable();
@@ -105,7 +105,7 @@ return new class extends Migration
         // Candidate Passports
         Schema::create('candidate_passports', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('candidate_id')->constrained('candidates')->onDelete('cascade');
+            $table->foreignUuid('candidate_id')->constrained('candidates')->cascadeOnDelete();
             $table->string('passport_number');
             $table->date('issue_date')->nullable();
             $table->string('issued_by')->nullable();
@@ -117,7 +117,7 @@ return new class extends Migration
         // Candidate Emergency Contacts
         Schema::create('candidate_emergency_contacts', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('candidate_id')->constrained('candidates')->onDelete('cascade');
+            $table->foreignUuid('candidate_id')->constrained('candidates')->cascadeOnDelete();
             $table->string('name');
             $table->string('contact_number');
             $table->string('relation')->nullable();
@@ -128,7 +128,7 @@ return new class extends Migration
         // Candidate Educations
         Schema::create('candidate_educations', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('candidate_id')->constrained('candidates')->onDelete('cascade');
+            $table->foreignUuid('candidate_id')->constrained('candidates')->cascadeOnDelete();
             $table->string('institution_name');
             $table->string('degree')->nullable();
             $table->string('major')->nullable();
@@ -142,7 +142,7 @@ return new class extends Migration
         // Candidate Non Formal Educations
         Schema::create('candidate_non_formal_educations', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('candidate_id')->constrained('candidates')->onDelete('cascade');
+            $table->foreignUuid('candidate_id')->constrained('candidates')->cascadeOnDelete();
             $table->string('year')->nullable();
             $table->string('name');
             $table->string('subject')->nullable();
@@ -153,7 +153,7 @@ return new class extends Migration
         // Candidate Experiences
         Schema::create('candidate_experiences', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('candidate_id')->constrained('candidates')->onDelete('cascade');
+            $table->foreignUuid('candidate_id')->constrained('candidates')->cascadeOnDelete();
             $table->string('company_name');
             $table->string('position');
             $table->date('start_date');
@@ -166,7 +166,7 @@ return new class extends Migration
         // Candidate Languages
         Schema::create('candidate_languages', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('candidate_id')->constrained('candidates')->onDelete('cascade');
+            $table->foreignUuid('candidate_id')->constrained('candidates')->cascadeOnDelete();
             $table->string('language');
             $table->string('speaking')->nullable();
             $table->string('reading')->nullable();
@@ -177,7 +177,7 @@ return new class extends Migration
         // Candidate Skills
         Schema::create('candidate_skills', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('candidate_id')->constrained('candidates')->onDelete('cascade');
+            $table->foreignUuid('candidate_id')->constrained('candidates')->cascadeOnDelete();
             $table->string('skill_name');
             $table->string('proficiency_level')->default('Beginner');
             $table->timestamps();
@@ -198,6 +198,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('candidate_computer_skills');
         Schema::dropIfExists('candidate_skills');
         Schema::dropIfExists('candidate_languages');
         Schema::dropIfExists('candidate_experiences');
@@ -209,7 +210,6 @@ return new class extends Migration
         Schema::dropIfExists('candidate_profiles');
         Schema::dropIfExists('candidates');
         Schema::dropIfExists('vendor_profiles');
-        Schema::dropIfExists('candidate_computer_skills');
         Schema::dropIfExists('client_batches');
         Schema::dropIfExists('clients');
     }

@@ -20,23 +20,23 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        // Users
+        Schema::create('users', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('role_id')->constrained('roles');
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->rememberToken();
+            $table->timestamps();
+        });
+
         // Role Privileges
         Schema::create('role_privileges', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('role_id')->constrained('roles')->onDelete('cascade');
             $table->string('permission');
-            $table->timestamps();
-        });
-
-        // Users
-        Schema::create('users', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('role_id')->constrained('roles'); // No cascade delete usually for users
-            $table->string('name');
-            $table->string('email')->unique(); // Although schema didn't explicitly show unique index in create table, it's standard.
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
             $table->timestamps();
         });
 
@@ -73,8 +73,8 @@ return new class extends Migration
         Schema::dropIfExists('cache_locks');
         Schema::dropIfExists('cache');
         Schema::dropIfExists('sessions');
-        Schema::dropIfExists('users');
         Schema::dropIfExists('role_privileges');
+        Schema::dropIfExists('users');
         Schema::dropIfExists('roles');
     }
 };

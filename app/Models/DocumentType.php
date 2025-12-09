@@ -26,7 +26,9 @@ class DocumentType extends Model
     ];
 
     public function getTemplateUrlAttribute() {
-        return $this->template ? asset('storage/' . $this->template) : null;
+        if (!$this->template) return null;
+        if (str_starts_with($this->template, 'http')) return $this->template;
+        return \Illuminate\Support\Facades\Storage::disk('minio')->url($this->template);
     }
 
     protected $appends = ['template_url'];

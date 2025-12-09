@@ -37,6 +37,9 @@ Route::middleware(['auth:web,client', 'verified'])->group(function () {
 
         // Locations
         Route::resource('locations', \App\Http\Controllers\MasterData\LocationController::class)->except(['create', 'edit', 'show']);
+
+        // Audit Trail
+        Route::get('/audit-trails', [\App\Http\Controllers\AuditTrailController::class, 'index'])->name('audit-trails.index');
     });
 
     // Job Posting Routes
@@ -88,6 +91,7 @@ Route::middleware(['auth:web,client', 'verified'])->group(function () {
 
     // Admin Notification Routes
     Route::prefix('admin-notifications')->name('admin-notifications.')->group(function () {
+        Route::get('/inbox', [\App\Http\Controllers\AdminNotificationController::class, 'inbox'])->name('inbox');
         Route::get('/', [\App\Http\Controllers\AdminNotificationController::class, 'index'])->name('index');
         Route::post('/{id}/read', [\App\Http\Controllers\AdminNotificationController::class, 'markAsRead'])->name('mark-read');
         Route::post('/read-all', [\App\Http\Controllers\AdminNotificationController::class, 'markAllAsRead'])->name('mark-all-read');

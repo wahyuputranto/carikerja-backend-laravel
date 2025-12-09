@@ -8,6 +8,7 @@ class AdminNotification extends Model
 {
     protected $fillable = [
         'candidate_id',
+        'client_id',
         'type',
         'title',
         'message',
@@ -24,5 +25,10 @@ class AdminNotification extends Model
     public function candidate()
     {
         return $this->belongsTo(Candidate::class);
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class, 'client_id'); // Assuming Client model exists
     }
 }

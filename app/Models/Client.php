@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 class Client extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, \App\Traits\LogsActivity;
 
     protected $keyType = 'string';
     public $incrementing = false;

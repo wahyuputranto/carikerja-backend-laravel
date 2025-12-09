@@ -19,22 +19,14 @@ return new class extends Migration
             $table->string('city');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-
+            
             $table->index(['country', 'province', 'city']);
         });
 
         // Jobs
         Schema::create('jobs', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('client_profile_id'); // Note: This references clients but existing code uses this name? Or we should rename it? skema has client_profile_id. Ideally we should use client_id but user wants to match skema.
-            // Let's check skema for jobs references. It has client_profile_id.
-            // We'll keep client_profile_id but if we can, we should constrain it to clients if possible? 
-            // Skema does NOT show a constraint in the CREATE TABLE.
-            // But let's assume it should reference clients.
-            // However, to strictly match SKEMA which has NO constraint visible in the create statement (maybe dropped?), I'll leave it as uuid.
-            // Wait, usually Laravel conventions imply constraints.
-            // Use just uuid to be safe and match the lack of constraint in skema dump if that's the case.
-            // Actually, skema shows "client_profile_id" uuid NOT NULL.
+            $table->uuid('client_profile_id'); // Note: Maps to clients table but no FK in SQL dump
             $table->string('title');
             $table->string('slug')->unique();
             $table->text('description');
@@ -45,7 +37,7 @@ return new class extends Migration
             $table->decimal('salary_max', 15, 2)->nullable();
             $table->integer('quota')->default(1);
             $table->timestamp('deadline')->nullable();
-            $table->string('status')->default('DRAFT'); // DRAFT, PUBLISHED, CLOSED
+            $table->string('status')->default('DRAFT');
             $table->timestamps();
         });
 
@@ -56,7 +48,7 @@ return new class extends Migration
             $table->foreignUuid('candidate_id')->constrained('candidates');
             $table->timestamp('applied_at')->useCurrent();
             $table->timestamp('reviewed_at')->nullable();
-            $table->uuid('reviewed_by')->nullable(); // User ID
+            $table->uuid('reviewed_by')->nullable();
             $table->text('rejection_reason')->nullable();
             $table->text('revision_notes')->nullable();
             $table->integer('current_step')->default(1);
@@ -69,22 +61,22 @@ return new class extends Migration
             $table->text('cover_letter')->nullable();
             $table->text('notes')->nullable();
             $table->string('offering_letter_path')->nullable();
-            $table->string('status')->default('APPLIED'); // APPLIED, REVIEW, PRE_INTERVIEW, INTERVIEW, OFFERING, HIRED, PROCESSING_VISA, DEPLOYED, REJECTED
+            $table->string('status')->default('APPLIED');
             $table->timestamps();
         });
 
         // Interviews
         Schema::create('interviews', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('application_id')->nullable(); // Nullable for Pre-Interview
+            $table->uuid('application_id')->nullable();
             $table->foreignUuid('candidate_id')->nullable()->constrained('candidates')->cascadeOnDelete();
-            $table->foreignUuid('interviewer_id')->nullable(); // No constraint as per skema/migrations changes
-            $table->string('stage')->default('USER_INTERVIEW'); // PRE_INTERVIEW, USER_INTERVIEW
+            $table->uuid('interviewer_id')->nullable();
+            $table->string('stage')->default('USER_INTERVIEW');
             $table->timestamp('scheduled_at');
-            $table->string('type'); // ONLINE, OFFLINE
+            $table->string('type');
             $table->string('meeting_link')->nullable();
             $table->text('location_address')->nullable();
-            $table->string('result')->nullable(); // PASSED, FAILED
+            $table->string('result')->nullable();
             $table->text('feedback_notes')->nullable();
             $table->timestamps();
         });
@@ -97,7 +89,7 @@ return new class extends Migration
             $table->date('signed_at')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
-            $table->string('medical_status')->default('PENDING'); // FIT, UNFIT, PENDING
+            $table->string('medical_status')->default('PENDING');
             $table->date('check_date')->nullable();
             $table->string('reference_code')->nullable();
             $table->string('visa_number')->nullable();
@@ -116,12 +108,12 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('candidate_id')->constrained('candidates');
             $table->foreignId('document_type_id')->constrained('master_document_types');
-            $table->uuid('application_id')->nullable(); // Optional link to application
+            $table->uuid('application_id')->nullable();
             $table->string('file_path');
             $table->string('file_name');
             $table->string('mime_type')->nullable();
             $table->bigInteger('file_size')->nullable();
-            $table->string('status')->default('PENDING'); // PENDING, UPLOADED, VALID, INVALID
+            $table->string('status')->default('PENDING');
             $table->text('rejection_note')->nullable();
             $table->timestamp('uploaded_at')->nullable();
             $table->timestamps();
@@ -131,7 +123,7 @@ return new class extends Migration
         Schema::create('application_documents', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('application_id')->constrained('job_applications')->cascadeOnDelete();
-            $table->uuid('uploader_id'); // Can be user or candidate
+            $table->uuid('uploader_id');
             $table->string('title');
             $table->string('file_path');
             $table->bigInteger('file_size')->nullable();
@@ -143,7 +135,7 @@ return new class extends Migration
         Schema::create('profile_views', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('candidate_id')->constrained('candidates');
-            $table->uuid('viewer_id')->nullable(); // User ID
+            $table->uuid('viewer_id')->nullable();
             $table->timestamp('viewed_at')->useCurrent();
             $table->timestamps();
         });
@@ -151,7 +143,7 @@ return new class extends Migration
         // Notifications
         Schema::create('notifications', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('user_id'); // Can be User or Candidate UUID
+            $table->uuid('user_id');
             $table->string('title');
             $table->text('message');
             $table->boolean('is_read')->default(false);
@@ -163,13 +155,14 @@ return new class extends Migration
         // Admin Notifications
         Schema::create('admin_notifications', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('candidate_id')->constrained('candidates')->cascadeOnDelete();
-            $table->string('type');
+            $table->foreignUuid('candidate_id')->nullable()->constrained('candidates')->cascadeOnDelete();
+            $table->string('type'); // Made Not Null based on schema
             $table->string('title');
             $table->text('message');
             $table->string('url')->nullable();
             $table->boolean('is_read')->default(false);
             $table->timestamps();
+            $table->uuid('client_id')->nullable();
         });
     }
 
@@ -181,10 +174,6 @@ return new class extends Migration
         Schema::dropIfExists('admin_notifications');
         Schema::dropIfExists('notifications');
         Schema::dropIfExists('profile_views');
-        Schema::dropIfExists('candidate_documents');
-        Schema::dropIfExists('deployments');
-        Schema::dropIfExists('interviews');
-        Schema::dropIfExists('job_applications');
         Schema::dropIfExists('application_documents');
         Schema::dropIfExists('candidate_documents');
         Schema::dropIfExists('deployments');

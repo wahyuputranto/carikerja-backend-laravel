@@ -81,6 +81,11 @@ const showingNavigationDropdown = ref(false);
                                             Profile
                                         </DropdownLink>
                                         <DropdownLink
+                                            :href="route('admin-notifications.inbox')"
+                                        >
+                                            Inbox Notifikasi
+                                        </DropdownLink>
+                                        <DropdownLink
                                             :href="route('logout')"
                                             method="post"
                                             as="button"

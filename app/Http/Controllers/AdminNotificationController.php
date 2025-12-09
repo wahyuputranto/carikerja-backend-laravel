@@ -5,9 +5,32 @@ namespace App\Http\Controllers;
 use App\Models\AdminNotification;
 use App\Models\Candidate;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class AdminNotificationController extends Controller
 {
+    public function inbox(Request $request)
+    {
+        $status = $request->query('status', 'all'); // all, unread, read
+        
+        $query = AdminNotification::with(['candidate', 'client'])
+            ->orderBy('created_at', 'desc');
+
+        if ($status === 'unread') {
+            $query->where('is_read', false);
+        } elseif ($status === 'read') {
+            $query->where('is_read', true);
+        }
+
+        $notifications = $query->paginate(10)->withQueryString();
+
+        return Inertia::render('AdminNotifications/Index', [
+            'notifications' => $notifications,
+            'filters' => [
+                'status' => $status
+            ]
+        ]);
+    }
     public function index()
     {
         $notifications = AdminNotification::with('candidate')

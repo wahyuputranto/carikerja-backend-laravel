@@ -33,8 +33,12 @@ class DocumentTypeController extends Controller
         $validated['slug'] = Str::slug($validated['name']);
 
         if ($request->hasFile('template')) {
-            $path = $request->file('template')->store('document_templates', 'minio');
-            $validated['template'] = \Illuminate\Support\Facades\Storage::disk('minio')->url($path);
+            $extension = $request->file('template')->getClientOriginalExtension();
+            $filename = 'template_' . $validated['slug'] . '.' . $extension;
+            // Store file in minio
+            $path = $request->file('template')->storeAs('document_templates', $filename, 'minio');
+            // Save path to database
+            $validated['template'] = $path;
         }
 
         DocumentType::create($validated);
@@ -62,13 +66,24 @@ class DocumentTypeController extends Controller
         if ($request->hasFile('template')) {
             // Delete old template if exists
             if ($documentType->template) {
-                // Try to delete from public first (legacy check)
+                // Check if it's a legacy public file
                 if (\Illuminate\Support\Facades\Storage::disk('public')->exists($documentType->template)) {
                      \Illuminate\Support\Facades\Storage::disk('public')->delete($documentType->template);
                 }
+                // Check if it's in MinIO
+                if (\Illuminate\Support\Facades\Storage::disk('minio')->exists($documentType->template)) {
+                    \Illuminate\Support\Facades\Storage::disk('minio')->delete($documentType->template);
+               }
             }
-            $path = $request->file('template')->store('document_templates', 'minio');
-            $validated['template'] = \Illuminate\Support\Facades\Storage::disk('minio')->url($path);
+            
+            // Determine slug to use (new or existing)
+            $slug = isset($validated['slug']) ? $validated['slug'] : $documentType->slug;
+            $extension = $request->file('template')->getClientOriginalExtension();
+            $filename = 'template_' . $slug . '.' . $extension;
+            
+            // Store file in minio
+            $path = $request->file('template')->storeAs('document_templates', $filename, 'minio');
+            $validated['template'] = $path;
         }
 
         $documentType->update($validated);

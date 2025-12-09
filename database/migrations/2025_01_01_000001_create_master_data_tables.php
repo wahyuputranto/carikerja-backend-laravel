@@ -11,21 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Master Locations
-        Schema::create('master_locations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('parent_id')->nullable()->constrained('master_locations')->nullOnDelete();
-            $table->string('name');
-            $table->string('type'); // COUNTRY, PROVINCE, CITY
-            $table->timestamps();
-        });
-
         // Master Job Categories
         Schema::create('master_job_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
             $table->string('slug')->unique();
             $table->text('description')->nullable();
+            $table->timestamps();
+        });
+
+        // Master Locations
+        Schema::create('master_locations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('parent_id')->nullable()->constrained('master_locations')->nullOnDelete();
+            $table->string('name');
+            $table->string('type');
             $table->timestamps();
         });
 
@@ -47,6 +47,9 @@ return new class extends Migration
             $table->json('allowed_mimetypes')->nullable();
             $table->boolean('chunkable')->default(false);
             $table->string('stage')->default('REGISTRATION'); // REGISTRATION, POST_HIRING
+            $table->bigInteger('max_size')->nullable(); // satuan kb
+            $table->text('notes')->nullable();
+            $table->string('template')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -59,7 +62,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('master_document_types');
         Schema::dropIfExists('master_skills');
-        Schema::dropIfExists('master_job_categories');
         Schema::dropIfExists('master_locations');
+        Schema::dropIfExists('master_job_categories');
     }
 };

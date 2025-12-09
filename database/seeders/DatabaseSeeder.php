@@ -17,19 +17,18 @@ class DatabaseSeeder extends Seeder
         
         $this->call([
             RoleSeeder::class,
-            RolePrivilegeSeeder::class, // Add privileges and Recruiter role
+            RolePrivilegeSeeder::class,
             MasterDataSeeder::class,
             MasterDocumentTypeSeeder::class,
-            JobLocationSeeder::class, // Job locations for Turkey, Taiwan, Bulgaria
+            JobLocationSeeder::class,
             SuperadminSeeder::class,
-            RecruiterSeeder::class, // Create Recruiter user
-            ClientSeeder::class,
-            CandidateSeeder::class,
+            RecruiterSeeder::class,
+            // ClientSeeder::class,
+            // CandidateSeeder::class,
             // JobSeeder::class,
-            SampleJobSeeder::class,
-            ApplicationSeeder::class,
-            InterviewSeeder::class,
-            NotificationSeeder::class,
+            // ApplicationSeeder::class,
+            // InterviewSeeder::class,
+            // NotificationSeeder::class,
         ]);
 
         $this->command->info('Database seeding completed successfully!');
