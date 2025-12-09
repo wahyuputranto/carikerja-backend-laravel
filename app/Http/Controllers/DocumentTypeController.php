@@ -33,7 +33,8 @@ class DocumentTypeController extends Controller
         $validated['slug'] = Str::slug($validated['name']);
 
         if ($request->hasFile('template')) {
-            $validated['template'] = $request->file('template')->store('document_templates', 'public');
+            $path = $request->file('template')->store('document_templates', 'minio');
+            $validated['template'] = \Illuminate\Support\Facades\Storage::disk('minio')->url($path);
         }
 
         DocumentType::create($validated);
@@ -61,9 +62,13 @@ class DocumentTypeController extends Controller
         if ($request->hasFile('template')) {
             // Delete old template if exists
             if ($documentType->template) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($documentType->template);
+                // Try to delete from public first (legacy check)
+                if (\Illuminate\Support\Facades\Storage::disk('public')->exists($documentType->template)) {
+                     \Illuminate\Support\Facades\Storage::disk('public')->delete($documentType->template);
+                }
             }
-            $validated['template'] = $request->file('template')->store('document_templates', 'public');
+            $path = $request->file('template')->store('document_templates', 'minio');
+            $validated['template'] = \Illuminate\Support\Facades\Storage::disk('minio')->url($path);
         }
 
         $documentType->update($validated);
