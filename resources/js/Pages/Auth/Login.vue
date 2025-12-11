@@ -39,11 +39,9 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
                 <!-- Logo & Title -->
                 <div class="text-center">
                     <div class="flex justify-center mb-4">
-                        <img src="/images/logo.png" alt="Logo" class="h-16 w-auto" />
+                        <img src="/images/zmijobs-logo.png" alt="Logo" class="h-16 w-auto" />
                     </div>
-                    <h1 class="text-4xl font-bold text-gray-900 mb-2">
-                        {{ appName }}
-                    </h1>
+                    <!-- AppName removed as it is in the logo -->
                     <h2 class="text-2xl font-semibold text-gray-800 mb-2">
                         Welcome Back! 👋
                     </h2>
@@ -184,8 +182,10 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
                 <div class="max-w-md text-center space-y-6">
                     <!-- Icon/Illustration -->
                     <div class="flex justify-center mb-8">
-                        <div class="w-24 h-24 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center p-4">
-                            <img src="/images/logo.png" alt="Logo" class="w-full h-full object-contain" />
+                        <div class="">
+                            <svg class="w-32 h-32 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor">
+                                <path d="M228.25,63.07l-4.66-2.69a23.6,23.6,0,0,0,0-8.76l4.66-2.69a8,8,0,0,0-8-13.86l-4.67,2.7A23.92,23.92,0,0,0,208,33.38V28a8,8,0,0,0-16,0v5.38a23.92,23.92,0,0,0-7.58,4.39l-4.67-2.7a8,8,0,1,0-8,13.86l4.66,2.69a23.6,23.6,0,0,0,0,8.76l-4.66,2.69a8,8,0,0,0,4,14.93,7.92,7.92,0,0,0,4-1.07l4.67-2.7A23.92,23.92,0,0,0,192,78.62V84a8,8,0,0,0,16,0V78.62a23.92,23.92,0,0,0,7.58-4.39l4.67,2.7a7.92,7.92,0,0,0,4,1.07,8,8,0,0,0,4-14.93ZM192,56a8,8,0,1,1,8,8A8,8,0,0,1,192,56Zm29.35,48.11a8,8,0,0,0-6.57,9.21A88.85,88.85,0,0,1,216,128a87.62,87.62,0,0,1-22.24,58.41,79.66,79.66,0,0,0-36.06-28.75,48,48,0,1,0-59.4,0,79.66,79.66,0,0,0-36.06,28.75A88,88,0,0,1,128,40a88.76,88.76,0,0,1,14.68,1.22,8,8,0,0,0,2.64-15.78,103.92,103.92,0,1,0,85.24,85.24A8,8,0,0,0,221.35,104.11ZM96,120a32,32,0,1,1,32,32A32,32,0,0,1,96,120ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0Z"/>
+                            </svg>
                         </div>
                     </div>
 
