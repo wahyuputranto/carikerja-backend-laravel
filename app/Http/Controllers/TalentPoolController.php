@@ -208,9 +208,25 @@ class TalentPoolController extends Controller
         ]);
 
         // Check if user has permission to view this candidate's documents
-        if (!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('client')) {
-            abort(403, 'Unauthorized access to candidate documents.');
+    $user = auth()->user();
+    $authorized = false;
+
+    if ($user instanceof \App\Models\Client) {
+        $authorized = true;
+    } elseif ($user instanceof \App\Models\User) {
+        // Allow if superadmin or has candidate.view permission
+        if ($user->hasRole('superadmin') || $user->hasPermission('candidate.view')) {
+            $authorized = true;
         }
+        // Fallback for old check style, though unlikely needed if hasPermission is used
+        elseif ($user->hasRole('client')) {
+             $authorized = true;
+        }
+    }
+
+    if (!$authorized) {
+        abort(403, 'Unauthorized access to candidate documents.');
+    }
 
         // Return proxy URL for documents too
         $path = $validated['document_path'];
