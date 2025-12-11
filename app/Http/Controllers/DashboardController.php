@@ -42,7 +42,11 @@ class DashboardController extends Controller
                     if ($candidate->profile && $candidate->profile->photo_url) {
                         try {
                             // Use file proxy logic
-                            $candidate->profile->photo_url = route('talent-pool.file-proxy', ['path' => $candidate->profile->photo_url]);
+                            $path = $candidate->profile->photo_url;
+                            $candidate->profile->photo_url = route('talent-pool.file-proxy', [
+                                'filename' => basename($path),
+                                'path' => $path
+                            ]);
                         } catch (\Exception $e) {
                             // Log error or keep original URL
                         }

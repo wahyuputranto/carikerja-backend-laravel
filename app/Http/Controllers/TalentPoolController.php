@@ -50,7 +50,11 @@ class TalentPoolController extends Controller
             if ($candidate->profile && $candidate->profile->photo_url) {
                 try {
                     // Use file proxy instead of direct temporaryUrl to avoid Mixed Content/CORS
-                    $candidate->profile->photo_url = route('talent-pool.file-proxy', ['path' => $candidate->profile->photo_url]);
+                    $path = $candidate->profile->photo_url;
+                    $candidate->profile->photo_url = route('talent-pool.file-proxy', [
+                        'filename' => basename($path),
+                        'path' => $path
+                    ]);
                 } catch (\Exception $e) {
                     // Log error or keep original URL
                 }
@@ -100,7 +104,11 @@ class TalentPoolController extends Controller
         if ($candidate->profile && $candidate->profile->photo_url) {
             try {
                 // Use file proxy
-                $candidate->profile->photo_url = route('talent-pool.file-proxy', ['path' => $candidate->profile->photo_url]);
+                $path = $candidate->profile->photo_url;
+                $candidate->profile->photo_url = route('talent-pool.file-proxy', [
+                    'filename' => basename($path),
+                    'path' => $path
+                ]);
             } catch (\Exception $e) {
                 // Log error or keep original URL if generation fails
                 \Log::error('Failed to generate photo URL: ' . $e->getMessage());
@@ -193,7 +201,11 @@ class TalentPoolController extends Controller
         }
 
         // Return proxy URL for documents too
-        $url = route('talent-pool.file-proxy', ['path' => $validated['document_path']]);
+        $path = $validated['document_path'];
+        $url = route('talent-pool.file-proxy', [
+            'filename' => basename($path),
+            'path' => $path
+        ]);
 
         return response()->json(['url' => $url]);
     }
@@ -210,7 +222,7 @@ class TalentPoolController extends Controller
         return back()->with('success', 'CV generation request sent to background worker.');
     }
 
-    public function fileProxy(Request $request)
+    public function fileProxy(Request $request, $filename = null)
     {
         $validated = $request->validate([
             'path' => 'required|string',
@@ -230,13 +242,19 @@ class TalentPoolController extends Controller
 
         // Stream the file content
         $stream = \Storage::disk('minio')->readStream($path);
+        $mimeType = \Storage::disk('minio')->mimeType($path);
+        
+        // Use provided filename or fallback to basename
+        $displayFilename = $filename ?? basename($path);
+        // Sanitize for header
+        $asciiFilename = \Illuminate\Support\Str::ascii($displayFilename);
         
         return response()->stream(function () use ($stream) {
             fpassthru($stream);
         }, 200, [
-            'Content-Type' => \Storage::disk('minio')->mimeType($path),
-            'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
-            'Cache-Control' => 'private, max-age=3600',
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'inline; filename="' . $asciiFilename . '"',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate', // Disable cache for debugging
         ]);
     }
 }

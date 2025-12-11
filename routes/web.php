@@ -48,7 +48,9 @@ Route::middleware(['auth:web,client', 'verified'])->group(function () {
     // Talent Pool Routes
     Route::prefix('talent-pool')->name('talent-pool.')->group(function () {
         // File Proxy (Must be defined BEFORE wildcard routes)
-        Route::get('/file-proxy', [\App\Http\Controllers\TalentPoolController::class, 'fileProxy'])->name('file-proxy');
+        Route::get('/file-proxy/{filename?}', [\App\Http\Controllers\TalentPoolController::class, 'fileProxy'])
+            ->name('file-proxy')
+            ->where('filename', '.*'); // Allow dots and slashes in filename if needed, though usually just basename
 
         Route::get('/', [\App\Http\Controllers\TalentPoolController::class, 'index'])->name('index');
         Route::get('/{candidate}', [\App\Http\Controllers\TalentPoolController::class, 'show'])->name('show');
