@@ -47,6 +47,9 @@ Route::middleware(['auth:web,client', 'verified'])->group(function () {
 
     // Talent Pool Routes
     Route::prefix('talent-pool')->name('talent-pool.')->group(function () {
+        // File Proxy (Must be defined BEFORE wildcard routes)
+        Route::get('/file-proxy', [\App\Http\Controllers\TalentPoolController::class, 'fileProxy'])->name('file-proxy');
+
         Route::get('/', [\App\Http\Controllers\TalentPoolController::class, 'index'])->name('index');
         Route::get('/{candidate}', [\App\Http\Controllers\TalentPoolController::class, 'show'])->name('show');
         Route::patch('/{candidate}/status', [\App\Http\Controllers\TalentPoolController::class, 'updateStatus'])->name('update-status');
@@ -56,9 +59,8 @@ Route::middleware(['auth:web,client', 'verified'])->group(function () {
         Route::post('/{candidate}/reject', [\App\Http\Controllers\TalentPoolController::class, 'reject'])->name('reject');
         Route::post('/{candidate}/revise', [\App\Http\Controllers\TalentPoolController::class, 'revise'])->name('revise');
         
-        // Secure Document Viewer
+        // Secure Document Viewer (Legacy, replaced by proxy but kept if needed)
         Route::post('/{candidate}/document-url', [\App\Http\Controllers\TalentPoolController::class, 'getDocumentUrl'])->name('document-url');
-        Route::get('/file-proxy', [\App\Http\Controllers\TalentPoolController::class, 'fileProxy'])->name('file-proxy');
         
         // Generate CV
         Route::post('/{candidate}/generate-cv', [\App\Http\Controllers\TalentPoolController::class, 'generateCV'])->name('generate-cv');
