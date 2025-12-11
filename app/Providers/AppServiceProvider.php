@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        //force https if env is production
+        if (env('APP_ENV') === 'production') {
+            URL::forceScheme('https');
+        }
         // Define Gate for permissions
         \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
             return $user->hasPermission($ability) ? true : null;
