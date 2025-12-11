@@ -211,6 +211,17 @@ const getApplicationStatusBadgeClass = (status) => {
                         <div class="text-sm text-gray-500 dark:text-gray-400">{{ candidate.phone }}</div>
                     </div>
 
+                    <!-- Document Progress (Mobile) -->
+                    <div class="mb-4">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-500 dark:text-gray-400">Documents</span>
+                            <span class="text-gray-900 dark:text-gray-100 font-medium">{{ candidate.document_progress || 0 }}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                            <div class="bg-primary-600 h-2 rounded-full transition-all duration-300" :style="{ width: (candidate.document_progress || 0) + '%' }"></div>
+                        </div>
+                    </div>
+
                     <!-- Applications -->
                     <div v-if="candidate.applications && candidate.applications.length > 0" class="mb-4">
                         <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Applications</div>
@@ -270,6 +281,7 @@ const getApplicationStatusBadgeClass = (status) => {
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Candidate</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Contact</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Documents</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Applications</th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
@@ -295,6 +307,14 @@ const getApplicationStatusBadgeClass = (status) => {
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900 dark:text-gray-100">{{ candidate.email }}</div>
                                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ candidate.phone }}</div>
+                                </td>
+
+                                <!-- Document Progress -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 min-w-[100px] max-w-[150px]">
+                                        <div class="bg-primary-600 h-2.5 rounded-full transition-all duration-300" :style="{ width: (candidate.document_progress || 0) + '%' }"></div>
+                                    </div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ candidate.document_progress || 0 }}% Required Docs</div>
                                 </td>
 
                                 <!-- Status -->

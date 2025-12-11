@@ -12,7 +12,7 @@ class TalentPoolController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Candidate::with(['profile', 'educations', 'experiences', 'applications.job']);
+        $query = Candidate::with(['profile', 'educations', 'experiences', 'applications.job', 'documents.documentType']);
 
         // Search functionality
         if ($request->filled('search')) {
@@ -45,8 +45,10 @@ class TalentPoolController extends Controller
 
         $candidates = $query->latest()->paginate(15)->withQueryString();
 
-        // Generate temporary URLs for profile photos
-        $candidates->getCollection()->transform(function ($candidate) {
+        $totalMandatoryDocs = \App\Models\DocumentType::where('is_mandatory', true)->count();
+
+        // Generate temporary URLs for profile photos and calculate progress
+        $candidates->getCollection()->transform(function ($candidate) use ($totalMandatoryDocs) {
             if ($candidate->profile && $candidate->profile->photo_url) {
                 try {
                     // Use file proxy instead of direct temporaryUrl to avoid Mixed Content/CORS
@@ -59,6 +61,16 @@ class TalentPoolController extends Controller
                     // Log error or keep original URL
                 }
             }
+            
+            // Calculate document progress
+            $uploadedMandatory = $candidate->documents->filter(function ($doc) {
+                return $doc->documentType && $doc->documentType->is_mandatory;
+            })->count();
+
+            $candidate->document_progress = $totalMandatoryDocs > 0 
+                ? round(($uploadedMandatory / $totalMandatoryDocs) * 100) 
+                : 0;
+
             return $candidate;
         });
 
