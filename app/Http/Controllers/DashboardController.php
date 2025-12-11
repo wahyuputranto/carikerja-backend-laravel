@@ -41,10 +41,8 @@ class DashboardController extends Controller
                 ->map(function ($candidate) {
                     if ($candidate->profile && $candidate->profile->photo_url) {
                         try {
-                            $candidate->profile->photo_url = \Storage::disk('minio')->temporaryUrl(
-                                $candidate->profile->photo_url,
-                                now()->addMinutes(60)
-                            );
+                            // Use file proxy logic
+                            $candidate->profile->photo_url = route('talent-pool.file-proxy', ['path' => $candidate->profile->photo_url]);
                         } catch (\Exception $e) {
                             // Log error or keep original URL
                         }
