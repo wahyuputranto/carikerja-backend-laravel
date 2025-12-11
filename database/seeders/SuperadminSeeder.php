@@ -33,7 +33,7 @@ class SuperadminSeeder extends Seeder
             'id' => Str::uuid(),
             'role_id' => $superadminRole->id,
             'name' => 'Super Admin',
-            'email' => 'admin@carikerja.id',
+            'email' => 'admin@zmijobs.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
             'created_at' => now(),
