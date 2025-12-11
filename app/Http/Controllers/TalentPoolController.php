@@ -235,6 +235,7 @@ class TalentPoolController extends Controller
             fpassthru($stream);
         }, 200, [
             'Content-Type' => \Storage::disk('minio')->mimeType($path),
+            'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
             'Cache-Control' => 'private, max-age=3600',
         ]);
     }
