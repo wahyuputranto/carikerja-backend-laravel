@@ -23,7 +23,7 @@ class SuperadminSeeder extends Seeder
         }
 
         // Check if user exists
-        $existing = DB::table('users')->where('email', 'admin@carikerja.id')->first();
+        $existing = DB::table('users')->where('email', 'admin@zmijobs.com')->first();
         if ($existing) {
             $this->command->info('Superadmin already exists.');
             return;
@@ -41,7 +41,7 @@ class SuperadminSeeder extends Seeder
         ]);
 
         $this->command->info('Superadmin user created successfully!');
-        $this->command->info('Email: admin@carikerja.id');
+        $this->command->info('Email: admin@zmijobs.com');
         $this->command->info('Password: password');
     }
 }

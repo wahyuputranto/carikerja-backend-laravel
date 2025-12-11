@@ -26,7 +26,7 @@ class RecruiterSeeder extends Seeder
             'id' => Str::uuid(),
             'role_id' => $recruiterRole->id,
             'name' => 'Recruiter Admin',
-            'email' => 'recruiter@carikerja.id',
+            'email' => 'recruiter@zmijobs.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
             'created_at' => now(),
@@ -34,7 +34,7 @@ class RecruiterSeeder extends Seeder
         ]);
 
         $this->command->info('Recruiter user created successfully!');
-        $this->command->info('Email: recruiter@carikerja.id');
+        $this->command->info('Email: recruiter@zmijobs.com');
         $this->command->info('Password: password');
     }
 }
