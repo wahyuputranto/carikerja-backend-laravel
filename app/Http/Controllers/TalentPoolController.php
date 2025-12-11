@@ -49,10 +49,8 @@ class TalentPoolController extends Controller
         $candidates->getCollection()->transform(function ($candidate) {
             if ($candidate->profile && $candidate->profile->photo_url) {
                 try {
-                    $candidate->profile->photo_url = \Storage::disk('minio')->temporaryUrl(
-                        $candidate->profile->photo_url,
-                        now()->addMinutes(60)
-                    );
+                    // Use file proxy instead of direct temporaryUrl to avoid Mixed Content/CORS
+                    $candidate->profile->photo_url = route('talent-pool.file-proxy', ['path' => $candidate->profile->photo_url]);
                 } catch (\Exception $e) {
                     // Log error or keep original URL
                 }
@@ -101,11 +99,8 @@ class TalentPoolController extends Controller
 
         if ($candidate->profile && $candidate->profile->photo_url) {
             try {
-                // Generate temporary URL for the photo
-                $candidate->profile->photo_url = \Storage::disk('minio')->temporaryUrl(
-                    $candidate->profile->photo_url,
-                    now()->addMinutes(60)
-                );
+                // Use file proxy
+                $candidate->profile->photo_url = route('talent-pool.file-proxy', ['path' => $candidate->profile->photo_url]);
             } catch (\Exception $e) {
                 // Log error or keep original URL if generation fails
                 \Log::error('Failed to generate photo URL: ' . $e->getMessage());
@@ -197,11 +192,8 @@ class TalentPoolController extends Controller
             abort(403, 'Unauthorized access to candidate documents.');
         }
 
-        // Generate temporary URL (valid for 5 minutes)
-        $url = \Storage::disk('minio')->temporaryUrl(
-            $validated['document_path'],
-            now()->addMinutes(5)
-        );
+        // Return proxy URL for documents too
+        $url = route('talent-pool.file-proxy', ['path' => $validated['document_path']]);
 
         return response()->json(['url' => $url]);
     }
@@ -216,5 +208,34 @@ class TalentPoolController extends Controller
         ]);
 
         return back()->with('success', 'CV generation request sent to background worker.');
+    }
+
+    public function fileProxy(Request $request)
+    {
+        $validated = $request->validate([
+            'path' => 'required|string',
+        ]);
+
+        $path = $validated['path'];
+
+        // Security check: ensure user is authenticated
+        if (!auth()->check()) {
+            abort(403);
+        }
+
+        // Check if file exists in MinIO
+        if (!\Storage::disk('minio')->exists($path)) {
+            abort(404);
+        }
+
+        // Stream the file content
+        $stream = \Storage::disk('minio')->readStream($path);
+        
+        return response()->stream(function () use ($stream) {
+            fpassthru($stream);
+        }, 200, [
+            'Content-Type' => \Storage::disk('minio')->mimeType($path),
+            'Cache-Control' => 'private, max-age=3600',
+        ]);
     }
 }
