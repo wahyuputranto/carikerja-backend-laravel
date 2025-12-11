@@ -248,13 +248,11 @@ class TalentPoolController extends Controller
         $displayFilename = $filename ?? basename($path);
         // Sanitize for header
         $asciiFilename = \Illuminate\Support\Str::ascii($displayFilename);
-        
-        return response()->stream(function () use ($stream) {
-            fpassthru($stream);
-        }, 200, [
-            'Content-Type' => $mimeType,
+
+        // Usage of standard storage response helper which adds Content-Length automatically
+        return \Storage::disk('minio')->response($path, $asciiFilename, [
             'Content-Disposition' => 'inline; filename="' . $asciiFilename . '"',
-            'Cache-Control' => 'no-cache, no-store, must-revalidate', // Disable cache for debugging
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
         ]);
     }
 }
