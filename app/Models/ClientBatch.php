@@ -30,4 +30,9 @@ class ClientBatch extends Model
     {
         return $this->belongsTo(Client::class);
     }
+
+    public function jobs()
+    {
+        return $this->hasMany(Job::class, 'client_batch_id');
+    }
 }

@@ -64,6 +64,8 @@ class DeploymentController extends Controller
         if ($stage === 'CONTRACT') {
             $status = 'OFFERING'; 
             $step = 5; 
+            // Update Candidate Status to HIRED
+            $application->candidate()->update(['hiring_status' => 'HIRED']);
         } elseif ($stage === 'MEDICAL') {
             $status = 'PROCESSING_VISA';
             $step = 7;

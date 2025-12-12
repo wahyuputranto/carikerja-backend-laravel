@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, useForm, router, Link } from '@inertiajs/vue3';
+import { Head, useForm, router, Link, usePage } from '@inertiajs/vue3';
 import Pagination from '@/Components/Pagination.vue';
 import PremiumButton from '@/Components/PremiumButton.vue';
 import Modal from '@/Components/Modal.vue';
@@ -19,6 +19,15 @@ const props = defineProps({
     clients: Object, // for pagination
     filters: Object,
 });
+
+const page = usePage();
+const hasPermission = (permission) => {
+    const user = page.props.auth.user;
+    if (user?.role?.slug === 'superadmin') return true;
+    const permissions = page.props.auth.permissions || [];
+    if (permissions.includes('*')) return true;
+    return permissions.includes(permission);
+};
 
 const search = ref(props.filters?.search || '');
 
@@ -53,6 +62,8 @@ const openCreateModal = () => {
 const openEditModal = (item) => {
     editingItem.value = item;
     form.reset();
+    form.password = '';
+    form.password_confirmation = '';
     form.name = item.name;
     form.email = item.email;
     form.company_name = item.company_name;
@@ -110,7 +121,7 @@ const deleteItem = (item) => {
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </div>
-                    <PremiumButton @click="openCreateModal" class="inline-flex items-center justify-center">
+                    <PremiumButton v-if="hasPermission('client.create')" @click="openCreateModal" class="inline-flex items-center justify-center">
                         <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                         </svg>
@@ -130,10 +141,10 @@ const deleteItem = (item) => {
                                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ client.industry || 'N/A' }}</p>
                                 </div>
                                 <div class="flex space-x-2">
-                                    <button @click="openEditModal(client)" class="p-1 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded">
+                                    <button v-if="hasPermission('client.edit')" @click="openEditModal(client)" class="p-1 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
-                                    <button @click="deleteItem(client)" class="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded">
+                                    <button v-if="hasPermission('client.delete')" @click="deleteItem(client)" class="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                 </div>
@@ -162,6 +173,7 @@ const deleteItem = (item) => {
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Contact Person</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Industry</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Active Batch</th>
                                 <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
@@ -180,10 +192,19 @@ const deleteItem = (item) => {
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ client.industry || 'N/A' }}</div>
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div v-if="client.active_batch" class="text-sm">
+                                        <div class="font-medium text-indigo-600 dark:text-indigo-400">{{ client.active_batch.batch_name }}</div>
+                                        <div class="text-gray-500 dark:text-gray-400 text-xs">
+                                            Quota: {{ client.active_batch.used_quota }} / {{ client.active_batch.total_quota }}
+                                        </div>
+                                    </div>
+                                    <div v-else class="text-sm text-gray-400 italic">No Active Batch</div>
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button @click="openEditModal(client)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 mr-4">Edit</button>
+                                    <button v-if="hasPermission('client.edit')" @click="openEditModal(client)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 mr-4">Edit</button>
                                     <Link :href="route('clients.batches.index', client.id)" class="text-green-600 dark:text-green-400 hover:text-green-900 mr-4">Batches</Link>
-                                    <button @click="deleteItem(client)" class="text-red-600 dark:text-red-400 hover:text-red-900">Delete</button>
+                                    <button v-if="hasPermission('client.delete')" @click="deleteItem(client)" class="text-red-600 dark:text-red-400 hover:text-red-900">Delete</button>
                                 </td>
                             </tr>
                             <tr v-if="clients.data.length === 0">
@@ -220,12 +241,15 @@ const deleteItem = (item) => {
                     </div>
                     <div>
                         <InputLabel for="password" value="Password" />
-                        <TextInput id="password" v-model="form.password" type="password" class="mt-1 block w-full" :required="!editingItem" />
+                        <TextInput id="password" v-model="form.password" type="password" class="mt-1 block w-full" :required="!editingItem" autocomplete="new-password" />
+                        <p v-if="editingItem" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            Leave blank if you don't want to change the password.
+                        </p>
                         <InputError :message="form.errors.password" class="mt-2" />
                     </div>
                      <div>
                         <InputLabel for="password_confirmation" value="Confirm Password" />
-                        <TextInput id="password_confirmation" v-model="form.password_confirmation" type="password" class="mt-1 block w-full" :required="!editingItem" />
+                        <TextInput id="password_confirmation" v-model="form.password_confirmation" type="password" class="mt-1 block w-full" :required="!editingItem" autocomplete="new-password" />
                         <InputError :message="form.errors.password_confirmation" class="mt-2" />
                     </div>
 

@@ -61,4 +61,9 @@ class Client extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(ClientBatch::class);
     }
+
+    public function activeBatch()
+    {
+        return $this->hasOne(ClientBatch::class)->where('is_active', true);
+    }
 }

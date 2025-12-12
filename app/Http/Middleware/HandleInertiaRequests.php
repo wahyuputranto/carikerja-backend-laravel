@@ -34,6 +34,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
                 'role' => $request->user()?->role?->slug,
+                'permissions' => $request->user() ? ($request->user()->role?->slug === 'superadmin' ? ['*'] : $request->user()->role?->privileges->pluck('permission')) : [],
             ],
             'flash' => [
                 'success' => fn () => session('success'),

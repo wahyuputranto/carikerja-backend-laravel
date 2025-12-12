@@ -174,9 +174,20 @@ class InterviewController extends Controller
             ]);
         }
 
-        // 4. Update Candidate Status if needed?
-        // Maybe mark candidate as "Screened" or "Verified"?
-        // For now, just saving the result is enough as per request.
+        // 4. Update Candidate Status
+        if ($validated['result'] === 'PASSED') {
+             $mandatoryTypes = \App\Models\DocumentType::where('is_mandatory', true)->pluck('id');
+             $validMandatoryDocs = \App\Models\Document::where('candidate_id', $candidate->id)
+                ->whereIn('document_type_id', $mandatoryTypes)
+                ->where('status', 'VALID')
+                ->count();
+            
+            $allDocumentsApproved = ($validMandatoryDocs >= $mandatoryTypes->count());
+
+            if ($allDocumentsApproved) {
+                $candidate->update(['hiring_status' => 'READY_TO_HIRE']);
+            }
+        }
 
         return back()->with('success', 'Pre-Interview result saved successfully.');
     }

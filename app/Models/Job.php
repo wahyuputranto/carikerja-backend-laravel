@@ -17,6 +17,7 @@ class Job extends Model
     
     protected $fillable = [
         'client_profile_id',
+        'client_batch_id',
         'title',
         'slug',
         'description',
@@ -64,6 +65,11 @@ class Job extends Model
     public function jobLocation(): BelongsTo
     {
         return $this->belongsTo(JobLocation::class, 'job_location_id');
+    }
+
+    public function batch(): BelongsTo
+    {
+        return $this->belongsTo(ClientBatch::class, 'client_batch_id');
     }
 
     public function applications(): HasMany

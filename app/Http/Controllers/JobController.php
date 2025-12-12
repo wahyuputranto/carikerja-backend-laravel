@@ -8,6 +8,7 @@ use App\Models\JobLocation;
 use App\Models\DocumentType;
 use App\Models\Client;
 use App\Models\Notification;
+use App\Models\ClientBatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -76,11 +77,22 @@ class JobController extends Controller
             ->orderBy('province')
             ->orderBy('city')
             ->get();
+        
+        $batches = null;
+        if (auth()->guard('client')->check()) {
+            $batches = ClientBatch::where('client_id', auth()->guard('client')->id())->where('is_active', true)->get();
+        } elseif (auth()->user()?->hasRole('superadmin')) {
+             // For superadmin, we might want to fetch batches dynamically via API based on selected client, 
+             // but for now let's pass all active batches to let frontend filter or simplified.
+             // Accessing ClientBatch directly.
+             $batches = ClientBatch::where('is_active', true)->get();
+        }
 
         return Inertia::render('Jobs/Create', [
             'categories' => JobCategory::all(),
             'jobLocations' => $jobLocations,
             'clients' => auth()->user()?->hasRole('superadmin') ? Client::all() : null,
+            'batches' => $batches,
         ]);
     }
 
@@ -98,6 +110,7 @@ class JobController extends Controller
             'deadline' => 'nullable|date|after:today',
             'status' => 'required|in:DRAFT,PUBLISHED,CLOSED',
             'client_profile_id' => auth()->user()?->hasRole('superadmin') ? 'required|exists:clients,id' : 'nullable',
+            'client_batch_id' => 'required|exists:client_batches,id',
         ]);
         
         if (auth()->guard('client')->check()) {
@@ -133,12 +146,20 @@ class JobController extends Controller
             ->orderBy('province')
             ->orderBy('city')
             ->get();
+            
+        $batches = null;
+        if (auth()->guard('client')->check()) {
+            $batches = ClientBatch::where('client_id', auth()->guard('client')->id())->where('is_active', true)->get();
+        } elseif (auth()->user()?->hasRole('superadmin')) {
+             $batches = ClientBatch::where('is_active', true)->get();
+        }
 
         return Inertia::render('Jobs/Edit', [
-            'job' => $job->load(['jobCategory', 'jobLocation']),
+            'job' => $job->load(['jobCategory', 'jobLocation', 'batch']),
             'categories' => JobCategory::all(),
             'jobLocations' => $jobLocations,
             'clients' => auth()->user()?->hasRole('superadmin') ? Client::all() : null,
+            'batches' => $batches,
         ]);
     }
 
@@ -158,6 +179,7 @@ class JobController extends Controller
             'deadline' => 'nullable|date',
             'status' => 'required|in:DRAFT,PUBLISHED,CLOSED',
             'client_profile_id' => auth()->user()?->hasRole('superadmin') ? 'required|exists:clients,id' : 'nullable',
+            'client_batch_id' => 'required|exists:client_batches,id',
         ]);
 
         if (auth()->user()?->hasRole('superadmin')) {

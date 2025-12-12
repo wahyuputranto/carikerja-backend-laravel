@@ -19,6 +19,7 @@ const props = defineProps({
     categories: Array,
     jobLocations: Array,
     clients: Array,
+    batches: Array,
 });
 
 const page = usePage();
@@ -31,6 +32,7 @@ const form = useForm({
     job_category_id: props.job.job_category_id,
     job_location_id: props.job.job_location_id,
     client_profile_id: props.job.client_profile_id,
+    client_batch_id: props.job.client_batch_id || '',
     salary_min: props.job.salary_min || '',
     salary_max: props.job.salary_max || '',
     quota: props.job.quota,
@@ -45,6 +47,15 @@ const locationOptions = computed(() => {
         label: `${location.city}, ${location.province}`,
         group: location.country
     }));
+});
+
+const filteredBatches = computed(() => {
+    if (!props.batches) return [];
+    if (isSuperAdmin) {
+        if (!form.client_profile_id) return [];
+        return props.batches.filter(b => b.client_id === form.client_profile_id);
+    }
+    return props.batches;
 });
 
 const submit = () => {
@@ -90,6 +101,26 @@ const deleteJob = () => {
                             </option>
                         </select>
                         <InputError :message="form.errors.client_profile_id" class="mt-2" />
+                    </div>
+
+                    <!-- Batch Selection -->
+                    <div v-if="filteredBatches.length > 0">
+                        <InputLabel for="client_batch_id" value="Batch *" />
+                        <select
+                            id="client_batch_id"
+                            v-model="form.client_batch_id"
+                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                            required
+                        >
+                            <option value="" disabled>Select a Batch</option>
+                            <option v-for="batch in filteredBatches" :key="batch.id" :value="batch.id">
+                                {{ batch.batch_name }} ({{ batch.start_date || 'N/A' }} - {{ batch.end_date || 'N/A' }})
+                            </option>
+                        </select>
+                        <InputError :message="form.errors.client_batch_id" class="mt-2" />
+                    </div>
+                    <div v-else-if="!isSuperAdmin && (!filteredBatches || filteredBatches.length === 0)" class="text-red-500 text-sm">
+                        No active batches found. Please create a batch first.
                     </div>
 
                     <!-- Job Title -->

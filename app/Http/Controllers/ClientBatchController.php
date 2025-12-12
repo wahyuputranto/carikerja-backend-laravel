@@ -36,10 +36,19 @@ class ClientBatchController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        // If setting as active, deactivate others
-        if ($request->is_active) {
-            $client->batches()->update(['is_active' => false]);
+        // Default is_active to true if not present (matching DB default)
+        $isActive = $request->has('is_active') ? $request->boolean('is_active') : true;
+        
+        // Strict Validation: Ensure only 1 active batch
+        if ($isActive) {
+            $hasActiveBatch = $client->batches()->where('is_active', true)->exists();
+            if ($hasActiveBatch) {
+                 return redirect()->back()->with('error', 'Hanya boleh ada satu batch yang aktif. Silakan nonaktifkan batch yang sedang berjalan terlebih dahulu.');
+            }
         }
+        
+        // Explicitly set is_active in validated data
+        $validated['is_active'] = $isActive;
 
         $client->batches()->create($validated);
 
@@ -63,8 +72,17 @@ class ClientBatchController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        if ($request->is_active) {
-            $client->batches()->where('id', '!=', $batch->id)->update(['is_active' => false]);
+        // Only check if we are explicitly setting it to active
+        if ($request->has('is_active') && $request->boolean('is_active')) {
+             // Check if ANY OTHER active batch exists
+             $hasOtherActive = $client->batches()
+                 ->where('id', '!=', $batch->id)
+                 ->where('is_active', true)
+                 ->exists();
+                 
+             if ($hasOtherActive) {
+                 return redirect()->back()->with('error', 'Hanya boleh ada satu batch yang aktif. Silakan nonaktifkan batch lain terlebih dahulu.');
+             }
         }
 
         $batch->update($validated);

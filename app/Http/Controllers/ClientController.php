@@ -24,7 +24,8 @@ class ClientController extends Controller
             });
         }
 
-        $clients = $query->latest()
+        $clients = $query->with('activeBatch')
+            ->latest()
             ->paginate(10)
             ->withQueryString();
 
@@ -36,6 +37,12 @@ class ClientController extends Controller
 
     public function store(Request $request)
     {
+        try {
+            \Illuminate\Support\Facades\Gate::authorize('client.create');
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk membuat client.');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:clients',
@@ -65,6 +72,12 @@ class ClientController extends Controller
 
     public function update(Request $request, Client $client)
     {
+        try {
+            \Illuminate\Support\Facades\Gate::authorize('client.edit');
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk mengedit client.');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:clients,email,' . $client->id,
@@ -99,6 +112,12 @@ class ClientController extends Controller
 
     public function destroy(Client $client)
     {
+        try {
+            \Illuminate\Support\Facades\Gate::authorize('client.delete');
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menghapus client.');
+        }
+
         $client->delete();
 
         return redirect()->back()->with('success', 'Client deleted successfully.');

@@ -106,7 +106,7 @@ Route::middleware(['auth:web,client', 'verified'])->group(function () {
     // Client Routes
     Route::resource('clients', \App\Http\Controllers\ClientController::class)
         ->except(['show'])
-        ->middleware('role:superadmin');
+        ->middleware('can:menu.clients');
     
     // Client Batches Routes
     Route::prefix('clients/{client}/batches')->name('clients.batches.')->group(function () {
