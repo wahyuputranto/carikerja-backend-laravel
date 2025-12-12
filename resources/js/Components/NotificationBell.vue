@@ -110,7 +110,7 @@ onUnmounted(() => window.removeEventListener('click', closeDropdown));
 
         <div 
             v-if="showDropdown" 
-            class="absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-lg border border-gray-100 max-h-[32rem] overflow-y-auto z-50"
+            class="fixed inset-x-4 top-16 mt-2 w-auto max-h-[calc(100vh-6rem)] overflow-y-auto bg-white rounded-xl shadow-lg border border-gray-100 z-50 sm:absolute sm:inset-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 sm:max-h-[32rem]"
         >
             <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50 sticky top-0 z-10">
                 <h3 class="text-sm font-semibold text-gray-700">Notifikasi</h3>

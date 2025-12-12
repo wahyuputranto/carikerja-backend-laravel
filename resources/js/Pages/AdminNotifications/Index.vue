@@ -143,14 +143,20 @@ const formatDate = (dateString) => {
                     <!-- Pagination -->
                     <div v-if="notifications.links.length > 3" class="px-6 py-4 border-t border-gray-100">
                         <div class="flex flex-wrap gap-1">
-                            <Link
-                                v-for="(link, key) in notifications.links"
-                                :key="key"
-                                :href="link.url"
-                                v-html="link.label"
-                                class="px-4 py-2 border rounded-md text-sm"
-                                :class="{ 'bg-indigo-600 text-white': link.active, 'bg-white text-gray-700 hover:bg-gray-50': !link.active, 'opacity-50 cursor-not-allowed': !link.url }"
-                            />
+                            <template v-for="(link, key) in notifications.links" :key="key">
+                                <Link
+                                    v-if="link.url"
+                                    :href="link.url"
+                                    v-html="link.label"
+                                    class="px-4 py-2 border rounded-md text-sm transition-colors duration-150"
+                                    :class="{ 'bg-indigo-600 text-white hover:bg-indigo-700': link.active, 'bg-white text-gray-700 hover:bg-gray-50': !link.active }"
+                                />
+                                <span
+                                    v-else
+                                    v-html="link.label"
+                                    class="px-4 py-2 border rounded-md text-sm bg-white text-gray-300 cursor-not-allowed"
+                                ></span>
+                            </template>
                         </div>
                     </div>
                 </div>
