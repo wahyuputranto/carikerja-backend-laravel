@@ -24,7 +24,35 @@ class InterviewController extends Controller
 
         $stage = $validated['stage'] ?? 'USER_INTERVIEW';
 
-        // Create Interview
+        if ($stage === 'PRE_INTERVIEW') {
+            $candidateId = $application ? $application->candidate_id : ($validated['candidate_id'] ?? null);
+            if (!$candidateId) {
+                return back()->withErrors(['candidate_id' => 'Candidate ID is required for Pre-Interview']);
+            }
+
+            $preInterview = \App\Models\PreInterview::create([
+                'candidate_id' => $candidateId,
+                'interviewer_id' => Auth::id(),
+                'scheduled_at' => $validated['scheduled_at'],
+                'type' => $validated['type'],
+                'meeting_link' => $validated['meeting_link'],
+                'location_address' => $validated['address'] ?? null,
+                'feedback_notes' => $validated['notes'],
+            ]);
+
+            Notification::create([
+                'user_id' => $candidateId,
+                'title' => 'Pre-Interview Scheduled',
+                'message' => 'You have a new pre-interview scheduled for ' . $preInterview->scheduled_at->format('d M Y H:i'),
+                'type' => 'info',
+                'is_read' => false,
+                'related_id' => $preInterview->id,
+            ]);
+
+            return back()->with('success', 'Pre-Interview scheduled successfully.');
+        }
+
+        // Regular Interview Logic (User Interview)
         if ($validated['scheduled_at']) {
             $interview = Interview::create([
                 'application_id' => $application ? $application->id : null,
@@ -38,10 +66,8 @@ class InterviewController extends Controller
                 'stage' => $stage,
             ]);
 
-            $title = ($stage === 'PRE_INTERVIEW') ? 'Pre-Interview Scheduled' : 'Interview Scheduled';
-            $message = ($stage === 'PRE_INTERVIEW') 
-                ? 'You have a new pre-interview scheduled for ' . $interview->scheduled_at->format('d M Y H:i')
-                : 'You have a new interview scheduled for ' . $interview->scheduled_at->format('d M Y H:i');
+            $title = 'Interview Scheduled';
+            $message = 'You have a new interview scheduled for ' . $interview->scheduled_at->format('d M Y H:i');
 
             Notification::create([
                 'user_id' => $interview->candidate_id,
@@ -66,7 +92,7 @@ class InterviewController extends Controller
         }
 
         // If Application exists, update its status (User Interview flow)
-        if ($application) {
+        if ($application && $stage === 'USER_INTERVIEW') {
             // Determine Step & Status
             $status = $application->status;
             $step = $application->current_step;
@@ -167,23 +193,20 @@ class InterviewController extends Controller
         }
 
         // 3. Update Interview Record (Find the latest PRE_INTERVIEW for this candidate)
-        $interview = Interview::where('candidate_id', $candidate->id)
-            ->where('stage', 'PRE_INTERVIEW')
+        $preInterview = \App\Models\PreInterview::where('candidate_id', $candidate->id)
             ->latest()
             ->first();
 
-        if ($interview) {
-            $interview->update([
+        if ($preInterview) {
+            $preInterview->update([
                 'result' => $validated['result'],
                 'feedback_notes' => $validated['notes'],
             ]);
         } else {
             // If no scheduled interview found, create a record of the result
-            Interview::create([
-                'application_id' => $application ? $application->id : null,
+            $preInterview = \App\Models\PreInterview::create([
                 'candidate_id' => $candidate->id,
                 'interviewer_id' => Auth::id(),
-                'stage' => 'PRE_INTERVIEW',
                 'scheduled_at' => now(), // Assume done now
                 'type' => 'OFFLINE', // Default
                 'result' => $validated['result'],
@@ -193,19 +216,7 @@ class InterviewController extends Controller
 
         // 4. Update Candidate Status
         if ($validated['result'] === 'PASSED') {
-             $mandatoryTypes = \App\Models\DocumentType::where('is_mandatory', true)->pluck('id');
-             $validMandatoryDocs = \App\Models\Document::where('candidate_id', $candidate->id)
-                ->whereIn('document_type_id', $mandatoryTypes)
-                ->where('status', 'VALID')
-                ->count();
-            
-            $allDocumentsApproved = ($validMandatoryDocs >= $mandatoryTypes->count());
-
-            if ($allDocumentsApproved) {
-                $candidate->update(['hiring_status' => 'READY_TO_HIRE']);
-            } else {
-                $candidate->update(['hiring_status' => 'AVAILABLE']);
-            }
+            $candidate->updateHiringStatusIfReady();
         }
 
         // Notify Candidate of Pre-Interview Result
@@ -220,7 +231,7 @@ class InterviewController extends Controller
             'message' => $msg,
             'type' => 'info', // Or 'result' OR 'action_required'
             'is_read' => false,
-            'related_id' => $interview ? $interview->id : null,
+            'related_id' => $preInterview->id,
         ]);
 
         return back()->with('success', 'Pre-Interview result saved successfully.');

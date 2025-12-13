@@ -104,6 +104,7 @@ class TalentPoolController extends Controller
             'languages',
             'computerSkills',
             'interviews', // Load candidate level interviews
+            'preInterviews', // Load candidate level pre-interviews
             'educations',
             'experiences',
             'documents.documentType',
@@ -294,6 +295,7 @@ class TalentPoolController extends Controller
 
         // TODO: Notification and Status Update logic similar to CandidateDocumentController
         // Since CV is mandatory, we should nominally check if candidate can be moved to READY_TO_HIRE
+        $cv->candidate->updateHiringStatusIfReady();
         
         return redirect()->back()->with('success', 'CV approved successfully.');
     }

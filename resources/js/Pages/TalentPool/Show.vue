@@ -54,6 +54,21 @@ const otherDocuments = computed(() => {
     ) || [];
 });
 
+// Computed properties for Pre-Interviews
+const preInterviews = computed(() => {
+    // Combine old interviews (stage=PRE_INTERVIEW) and new pre_interviews relation
+    const oldPres = props.candidate.interviews?.filter(i => i.stage === 'PRE_INTERVIEW') || [];
+    // Check both cases just to be safe (Laravel serialization depends on configuration)
+    const newPres = props.candidate.pre_interviews || props.candidate.preInterviews || [];
+    
+    const normalizedNew = newPres.map(pi => ({
+        ...pi,
+        stage: 'PRE_INTERVIEW'
+    }));
+
+    return [...normalizedNew, ...oldPres].sort((a, b) => new Date(b.scheduled_at) - new Date(a.scheduled_at));
+});
+
 // Application Status Logic
 const showInterviewModal = ref(false);
 const showDeploymentModal = ref(false);
@@ -321,8 +336,8 @@ const getWhatsappUrl = (phone) => {
                     </div>
 
                     <!-- List of Pre-Interviews -->
-                    <div v-if="candidate.interviews && candidate.interviews.filter(i => i.stage === 'PRE_INTERVIEW').length > 0" class="space-y-4">
-                        <div v-for="interview in candidate.interviews.filter(i => i.stage === 'PRE_INTERVIEW')" :key="interview.id" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/30">
+                    <div v-if="preInterviews.length > 0" class="space-y-4">
+                        <div v-for="interview in preInterviews" :key="interview.id" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/30">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <div class="flex items-center gap-2 mb-1">
