@@ -111,6 +111,7 @@ class TalentPoolController extends Controller
             'applications.job.jobLocation',
             'applications.deployment', // Load deployment details
             'applications.documents', // Load client uploaded documents
+            'cv', // Load candidate CV
         ]);
 
         if ($candidate->profile && $candidate->profile->photo_url) {
@@ -282,5 +283,34 @@ class TalentPoolController extends Controller
             'Content-Disposition' => 'inline; filename="' . $asciiFilename . '"',
             'Cache-Control' => 'no-cache, no-store, must-revalidate',
         ]);
+    }
+
+    public function approveCv(Request $request, \App\Models\CandidateCv $cv)
+    {
+        $cv->update([
+            'status' => 'VALID',
+            'rejection_note' => null,
+        ]);
+
+        // TODO: Notification and Status Update logic similar to CandidateDocumentController
+        // Since CV is mandatory, we should nominally check if candidate can be moved to READY_TO_HIRE
+        
+        return redirect()->back()->with('success', 'CV approved successfully.');
+    }
+
+    public function rejectCv(Request $request, \App\Models\CandidateCv $cv)
+    {
+        $validated = $request->validate([
+            'rejection_note' => 'required|string|max:255',
+        ]);
+
+        $cv->update([
+            'status' => 'INVALID',
+            'rejection_note' => $validated['rejection_note'],
+        ]);
+
+        // TODO: Notification
+
+        return redirect()->back()->with('success', 'CV rejected successfully.');
     }
 }

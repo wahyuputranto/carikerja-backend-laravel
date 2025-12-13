@@ -107,4 +107,9 @@ class Candidate extends Model
     {
         return $this->hasMany(CandidateComputerSkill::class);
     }
+
+    public function cv()
+    {
+        return $this->hasOne(CandidateCv::class)->orderBy('uploaded_at', 'desc');
+    }
 }

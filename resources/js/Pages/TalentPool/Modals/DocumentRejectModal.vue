@@ -10,6 +10,10 @@ import InputError from '@/Components/InputError.vue';
 const props = defineProps({
     show: Boolean,
     documentId: [Number, String],
+    rejectRouteName: {
+        type: String,
+        default: 'candidate-documents.reject'
+    }
 });
 
 const emit = defineEmits(['close', 'submitted']);
@@ -19,7 +23,7 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('candidate-documents.reject', props.documentId), {
+    form.post(route(props.rejectRouteName, props.documentId), {
         onSuccess: () => {
             form.reset();
             emit('submitted');

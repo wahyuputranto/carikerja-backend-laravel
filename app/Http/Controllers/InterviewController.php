@@ -38,10 +38,15 @@ class InterviewController extends Controller
                 'stage' => $stage,
             ]);
 
+            $title = ($stage === 'PRE_INTERVIEW') ? 'Pre-Interview Scheduled' : 'Interview Scheduled';
+            $message = ($stage === 'PRE_INTERVIEW') 
+                ? 'You have a new pre-interview scheduled for ' . $interview->scheduled_at->format('d M Y H:i')
+                : 'You have a new interview scheduled for ' . $interview->scheduled_at->format('d M Y H:i');
+
             Notification::create([
                 'user_id' => $interview->candidate_id,
-                'title' => 'Interview Scheduled',
-                'message' => 'You have a new interview scheduled for ' . $interview->scheduled_at->format('d M Y H:i'),
+                'title' => $title,
+                'message' => $message,
                 'type' => 'info',
                 'is_read' => false,
                 'related_id' => $interview->id,
@@ -112,6 +117,18 @@ class InterviewController extends Controller
         }
 
         $application->update($updateData);
+
+        // Notify Candidate
+        if (!empty($validated['status'])) {
+             Notification::create([
+                'user_id' => $application->candidate_id,
+                'title' => 'Application Status Update',
+                'message' => 'Your application status for ' . ($application->job ? $application->job->title : 'Job') . ' has been updated to: ' . $validated['status'],
+                'type' => 'info',
+                'is_read' => false,
+                'related_id' => $application->id,
+            ]);
+        }
 
         return back()->with('success', 'Interview feedback saved successfully.');
     }
@@ -186,8 +203,25 @@ class InterviewController extends Controller
 
             if ($allDocumentsApproved) {
                 $candidate->update(['hiring_status' => 'READY_TO_HIRE']);
+            } else {
+                $candidate->update(['hiring_status' => 'AVAILABLE']);
             }
         }
+
+        // Notify Candidate of Pre-Interview Result
+        $msg = 'Status Pre-Interview Anda telah diperbarui: ' . ucfirst(strtolower($validated['result']));
+        if ($validated['result'] === 'PASSED') {
+            $msg = 'Selamat! Anda telah lulus tahap Pre-Interview. Silakan lengkapi dokumen wajib Anda untuk melanjutkan proses selanjutnya.';
+        }
+
+        Notification::create([
+            'user_id' => $candidate->id,
+            'title' => 'Pre-Interview Result',
+            'message' => $msg,
+            'type' => 'info', // Or 'result' OR 'action_required'
+            'is_read' => false,
+            'related_id' => $interview ? $interview->id : null,
+        ]);
 
         return back()->with('success', 'Pre-Interview result saved successfully.');
     }
@@ -210,10 +244,13 @@ class InterviewController extends Controller
             'feedback_notes' => $validated['notes'],
         ]);
 
+        $title = ($interview->stage === 'PRE_INTERVIEW') ? 'Pre-Interview Rescheduled' : 'Interview Rescheduled';
+        $msgType = ($interview->stage === 'PRE_INTERVIEW') ? 'pre-interview' : 'interview';
+
         Notification::create([
             'user_id' => $interview->candidate_id,
-            'title' => 'Interview Rescheduled',
-            'message' => 'Your interview has been rescheduled to ' . $interview->scheduled_at->format('d M Y H:i'),
+            'title' => $title,
+            'message' => 'Your ' . $msgType . ' has been rescheduled to ' . $interview->scheduled_at->format('d M Y H:i'),
             'type' => 'info',
             'is_read' => false,
             'related_id' => $interview->id,

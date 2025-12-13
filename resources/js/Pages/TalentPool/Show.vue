@@ -7,7 +7,7 @@ import DeploymentModal from './Modals/DeploymentModal.vue';
 import DocumentRejectModal from './Modals/DocumentRejectModal.vue';
 import FeedbackModal from './Modals/FeedbackModal.vue';
 import PreInterviewResultModal from './Modals/PreInterviewResultModal.vue'; // Import PreInterviewResultModal
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 defineOptions({
     layout: AppLayout,
@@ -34,6 +34,25 @@ const getStatusColor = (status) => {
     };
     return colors[status] || colors.AVAILABLE;
 };
+
+// Computed properties for Documents
+const cvDocuments = computed(() => {
+    if (props.candidate.cv) {
+        return [{
+            ...props.candidate.cv,
+            document_type: { name: 'Curriculum Vitae (CV)' },
+            is_cv: true
+        }];
+    }
+    return []; 
+});
+
+const otherDocuments = computed(() => {
+    return props.candidate.documents?.filter(doc => 
+        doc.document_type?.slug !== 'cv' && 
+        doc.document_type?.name !== 'Curriculum Vitae (CV)'
+    ) || [];
+});
 
 // Application Status Logic
 const showInterviewModal = ref(false);
@@ -92,6 +111,7 @@ const handleApplicationStatusChange = (application, event) => {
 // Document Logic
 const showRejectModal = ref(false);
 const selectedDocumentId = ref(null);
+const selectedRejectRouteName = ref('candidate-documents.reject');
 
 const viewDocument = async (doc) => {
     try {
@@ -107,7 +127,8 @@ const viewDocument = async (doc) => {
 
 const approveDocument = (doc) => {
     if (confirm('Are you sure you want to approve this document?')) {
-        router.post(route('candidate-documents.approve', doc.id), {}, {
+        const routeName = doc.is_cv ? 'candidate-cvs.approve' : 'candidate-documents.approve';
+        router.post(route(routeName, doc.id), {}, {
             preserveScroll: true,
         });
     }
@@ -115,6 +136,7 @@ const approveDocument = (doc) => {
 
 const openRejectModal = (doc) => {
     selectedDocumentId.value = doc.id;
+    selectedRejectRouteName.value = doc.is_cv ? 'candidate-cvs.reject' : 'candidate-documents.reject';
     showRejectModal.value = true;
 };
 
@@ -241,6 +263,42 @@ const getWhatsappUrl = (phone) => {
                             </PremiumButton>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Curriculum Vitae (CV) -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card mb-6">
+                <div class="p-6">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                        <svg class="h-6 w-6 mr-2 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Curriculum Vitae (CV)
+                    </h2>
+                    <div v-if="cvDocuments.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div v-for="doc in cvDocuments" :key="doc.id" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ doc.document_type?.name || 'CV' }}</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[150px]" :title="doc.file_name">{{ doc.file_name }}</p>
+                                <p class="text-xs mt-1">
+                                    Status: 
+                                    <span :class="{
+                                        'text-green-600': doc.status === 'VALID',
+                                        'text-red-600': doc.status === 'INVALID',
+                                        'text-yellow-600': doc.status === 'PENDING' || doc.status === 'UPLOADED'
+                                    }" class="font-semibold">{{ doc.status }}</span>
+                                </p>
+                                <p v-if="doc.rejection_note" class="text-xs text-red-500 mt-1">Note: {{ doc.rejection_note }}</p>
+                                <p class="text-xs text-gray-400 mt-1">Last Uploaded: {{ formatDate(doc.updated_at) }}</p>
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <button @click="viewDocument(doc)" class="text-blue-600 hover:text-blue-800 text-sm font-medium text-right">View</button>
+                                <button v-if="doc.status !== 'VALID'" @click="approveDocument(doc)" class="text-green-600 hover:text-green-800 text-sm font-medium text-right">Approve</button>
+                                <button v-if="doc.status !== 'INVALID'" @click="openRejectModal(doc)" class="text-red-600 hover:text-red-800 text-sm font-medium text-right">Reject</button>
+                            </div>
+                        </div>
+                    </div>
+                    <p v-else class="text-gray-500 dark:text-gray-400 italic">No CV uploaded.</p>
                 </div>
             </div>
 
@@ -532,41 +590,7 @@ const getWhatsappUrl = (phone) => {
 
             </div>
 
-            <!-- Documents (Unchanged) -->
-            <div class="mt-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card">
-                <div class="p-6">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                        <svg class="h-6 w-6 mr-2 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Documents
-                    </h2>
-                    <div v-if="candidate.documents && candidate.documents.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div v-for="doc in candidate.documents" :key="doc.id" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-center justify-between">
-                            <div>
-                                <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ doc.document_type?.name || 'Unknown Type' }}</h3>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[150px]" :title="doc.file_name">{{ doc.file_name }}</p>
-                                <p class="text-xs mt-1">
-                                    Status: 
-                                    <span :class="{
-                                        'text-green-600': doc.status === 'VALID',
-                                        'text-red-600': doc.status === 'INVALID',
-                                        'text-yellow-600': doc.status === 'PENDING' || doc.status === 'UPLOADED'
-                                    }" class="font-semibold">{{ doc.status }}</span>
-                                </p>
-                                <p v-if="doc.rejection_note" class="text-xs text-red-500 mt-1">Note: {{ doc.rejection_note }}</p>
-                                <p class="text-xs text-gray-400 mt-1">Last Uploaded: {{ formatDate(doc.updated_at) }}</p>
-                            </div>
-                            <div class="flex flex-col space-y-2">
-                                <button @click="viewDocument(doc)" class="text-blue-600 hover:text-blue-800 text-sm font-medium text-right">View</button>
-                                <button v-if="doc.status !== 'VALID'" @click="approveDocument(doc)" class="text-green-600 hover:text-green-800 text-sm font-medium text-right">Approve</button>
-                                <button v-if="doc.status !== 'INVALID'" @click="openRejectModal(doc)" class="text-red-600 hover:text-red-800 text-sm font-medium text-right">Reject</button>
-                            </div>
-                        </div>
-                    </div>
-                    <p v-else class="text-gray-500 dark:text-gray-400 italic">No documents uploaded.</p>
-                </div>
-            </div>
+
 
             <!-- Client Documents (New Section) -->
             <div v-if="candidate.applications && candidate.applications.some(app => app.documents && app.documents.length > 0)" class="mt-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card">
@@ -869,6 +893,42 @@ const getWhatsappUrl = (phone) => {
                     </div>
                 </div>
             </div>
+
+             <!-- Other Documents -->
+             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card mb-6 mt-6">
+                <div class="p-6">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                        <svg class="h-6 w-6 mr-2 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Documents
+                    </h2>
+                    <div v-if="otherDocuments.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div v-for="doc in otherDocuments" :key="doc.id" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ doc.document_type?.name || 'Unknown Type' }}</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[150px]" :title="doc.file_name">{{ doc.file_name }}</p>
+                                <p class="text-xs mt-1">
+                                    Status: 
+                                    <span :class="{
+                                        'text-green-600': doc.status === 'VALID',
+                                        'text-red-600': doc.status === 'INVALID',
+                                        'text-yellow-600': doc.status === 'PENDING' || doc.status === 'UPLOADED'
+                                    }" class="font-semibold">{{ doc.status }}</span>
+                                </p>
+                                <p v-if="doc.rejection_note" class="text-xs text-red-500 mt-1">Note: {{ doc.rejection_note }}</p>
+                                <p class="text-xs text-gray-400 mt-1">Last Uploaded: {{ formatDate(doc.updated_at) }}</p>
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <button @click="viewDocument(doc)" class="text-blue-600 hover:text-blue-800 text-sm font-medium text-right">View</button>
+                                <button v-if="doc.status !== 'VALID'" @click="approveDocument(doc)" class="text-green-600 hover:text-green-800 text-sm font-medium text-right">Approve</button>
+                                <button v-if="doc.status !== 'INVALID'" @click="openRejectModal(doc)" class="text-red-600 hover:text-red-800 text-sm font-medium text-right">Reject</button>
+                            </div>
+                        </div>
+                    </div>
+                    <p v-else class="text-gray-500 dark:text-gray-400 italic">No other documents uploaded.</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -909,6 +969,7 @@ const getWhatsappUrl = (phone) => {
         <DocumentRejectModal
             :show="showRejectModal"
             :document-id="selectedDocumentId"
+            :reject-route-name="selectedRejectRouteName"
             @close="onRejectModalClose"
             @submitted="onRejectModalClose"
         />

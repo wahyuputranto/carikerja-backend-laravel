@@ -15,6 +15,21 @@ class MasterDocumentTypeSeeder extends Seeder
         \DB::table('master_document_types')->truncate();
 
         $documentTypes = [
+
+            [
+                'name' => 'Curriculum Vitae (CV)',
+                'slug' => 'cv',
+                'is_mandatory' => true,
+                'allowed_mimetypes' => json_encode(['application/pdf']),
+                'chunkable' => false,
+                'stage' => 'REGISTRATION',
+                'created_at' => '2025-12-07 13:12:39',
+                'updated_at' => '2025-12-08 17:22:36',
+                'deleted_at' => null,
+                'max_size' => 1000,
+                'notes' => 'Ini cv ya..',
+                'template' => null
+            ],
             [
                 'name' => 'KTP',
                 'slug' => 'ktp',
@@ -58,20 +73,6 @@ class MasterDocumentTypeSeeder extends Seeder
                 'template' => null
             ],
             [
-                'name' => 'Curriculum Vitae (CV)',
-                'slug' => 'cv',
-                'is_mandatory' => true,
-                'allowed_mimetypes' => json_encode(['application/pdf']),
-                'chunkable' => false,
-                'stage' => 'REGISTRATION',
-                'created_at' => '2025-12-07 13:12:39',
-                'updated_at' => '2025-12-08 17:22:36',
-                'deleted_at' => null,
-                'max_size' => 1000,
-                'notes' => 'Ini cv ya..',
-                'template' => null
-            ],
-            [
                 'name' => 'Portfolio',
                 'slug' => 'portfolio',
                 'is_mandatory' => false,
@@ -85,34 +86,34 @@ class MasterDocumentTypeSeeder extends Seeder
                 'notes' => null,
                 'template' => null
             ],
-            [
-                'name' => 'Medical Check Up (MCU)',
-                'slug' => 'mcu',
-                'is_mandatory' => true,
-                'allowed_mimetypes' => json_encode(['application/pdf', 'image/jpeg', 'image/png']),
-                'chunkable' => false,
-                'stage' => 'POST_HIRING',
-                'created_at' => '2025-12-07 13:12:39',
-                'updated_at' => '2025-12-07 13:12:39',
-                'deleted_at' => null,
-                'max_size' => 1000,
-                'notes' => null,
-                'template' => null
-            ],
-            [
-                'name' => 'SKCK',
-                'slug' => 'skck',
-                'is_mandatory' => true,
-                'allowed_mimetypes' => json_encode(['application/pdf']),
-                'chunkable' => false,
-                'stage' => 'REGISTRATION',
-                'created_at' => '2025-12-08 14:10:14',
-                'updated_at' => '2025-12-08 14:10:14',
-                'deleted_at' => null,
-                'max_size' => 1000,
-                'notes' => null,
-                'template' => null
-            ],
+//            [
+//                'name' => 'Medical Check Up (MCU)',
+//                'slug' => 'mcu',
+//                'is_mandatory' => true,
+//                'allowed_mimetypes' => json_encode(['application/pdf', 'image/jpeg', 'image/png']),
+//                'chunkable' => false,
+//                'stage' => 'POST_HIRING',
+//                'created_at' => '2025-12-07 13:12:39',
+//                'updated_at' => '2025-12-07 13:12:39',
+//                'deleted_at' => null,
+//                'max_size' => 1000,
+//                'notes' => null,
+//                'template' => null
+//            ],
+//            [
+//                'name' => 'SKCK',
+//                'slug' => 'skck',
+//                'is_mandatory' => true,
+//                'allowed_mimetypes' => json_encode(['application/pdf']),
+//                'chunkable' => false,
+//                'stage' => 'REGISTRATION',
+//                'created_at' => '2025-12-08 14:10:14',
+//                'updated_at' => '2025-12-08 14:10:14',
+//                'deleted_at' => null,
+//                'max_size' => 1000,
+//                'notes' => null,
+//                'template' => null
+//            ],
             [
                 'name' => 'Paspor',
                 'slug' => 'paspor',

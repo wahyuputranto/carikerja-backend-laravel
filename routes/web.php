@@ -74,6 +74,12 @@ Route::middleware(['auth:web,client', 'verified'])->group(function () {
         Route::post('/{document}/reject', [\App\Http\Controllers\CandidateDocumentController::class, 'reject'])->name('reject');
     });
 
+    // Candidate CV Routes
+    Route::prefix('candidate-cvs')->name('candidate-cvs.')->group(function () {
+        Route::post('/{cv}/approve', [\App\Http\Controllers\TalentPoolController::class, 'approveCv'])->name('approve');
+        Route::post('/{cv}/reject', [\App\Http\Controllers\TalentPoolController::class, 'rejectCv'])->name('reject');
+    });
+
     // Application Routes
     Route::prefix('applications')->name('applications.')->group(function () {
         Route::patch('/{application}/status', [\App\Http\Controllers\ApplicationController::class, 'updateStatus'])->name('update-status');
