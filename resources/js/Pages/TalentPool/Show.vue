@@ -592,6 +592,41 @@ const getWhatsappUrl = (phone) => {
 
 
 
+            <!-- Other Documents -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card mb-6 mt-6">
+                <div class="p-6">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                        <svg class="h-6 w-6 mr-2 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        Documents ({{ otherDocuments.length }})
+                    </h2>
+                    <div v-if="otherDocuments.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div v-for="doc in otherDocuments" :key="doc.id" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ doc.document_type?.name || 'Unknown Type' }}</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[150px]" :title="doc.file_name">{{ doc.file_name }}</p>
+                                <p class="text-xs mt-1">
+                                    Status: 
+                                    <span :class="{
+                                        'text-green-600': doc.status === 'VALID',
+                                        'text-red-600': doc.status === 'INVALID',
+                                        'text-yellow-600': doc.status === 'PENDING' || doc.status === 'UPLOADED'
+                                    }" class="font-semibold">{{ doc.status }}</span>
+                                </p>
+                                <p v-if="doc.rejection_note" class="text-xs text-red-500 mt-1">Note: {{ doc.rejection_note }}</p>
+                                <p class="text-xs text-gray-400 mt-1">Last Uploaded: {{ formatDate(doc.updated_at) }}</p>
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <button @click="viewDocument(doc)" class="text-blue-600 hover:text-blue-800 text-sm font-medium text-right">View</button>
+                                <button v-if="doc.status !== 'VALID'" @click="approveDocument(doc)" class="text-green-600 hover:text-green-800 text-sm font-medium text-right">Approve</button>
+                                <button v-if="doc.status !== 'INVALID'" @click="openRejectModal(doc)" class="text-red-600 hover:text-red-800 text-sm font-medium text-right">Reject</button>
+                            </div>
+                        </div>
+                    </div>
+                    <p v-else class="text-gray-500 dark:text-gray-400 italic">No other documents uploaded.</p>
+                </div>
+            </div>
             <!-- Client Documents (New Section) -->
             <div v-if="candidate.applications && candidate.applications.some(app => app.documents && app.documents.length > 0)" class="mt-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card">
                 <div class="p-6">
@@ -894,15 +929,27 @@ const getWhatsappUrl = (phone) => {
                 </div>
             </div>
 
-             <!-- Other Documents -->
-             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card mb-6 mt-6">
+
+
+            <!-- DEBUG SECTION -->
+            <div class="bg-red-100 border-4 border-red-500 p-4 mb-6 text-red-700 font-bold text-center">
+                DEBUG: CAN YOU SEE THIS?
+                <br>
+                Documents Count: {{ candidate.documents ? candidate.documents.length : 'NULL' }}
+                <br>
+                Other Docs Length: {{ otherDocuments ? otherDocuments.length : 'NULL' }}
+            </div>
+
+            <!-- Other Documents -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg premium-card mb-6 mt-6">
                 <div class="p-6">
                     <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
                         <svg class="h-6 w-6 mr-2 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
-                        Documents
+                        Documents ({{ otherDocuments.length }})
                     </h2>
+                    
                     <div v-if="otherDocuments.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div v-for="doc in otherDocuments" :key="doc.id" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-center justify-between">
                             <div>
